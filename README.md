@@ -1,3 +1,13 @@
+
+
+This project is based on MantisTable, look the specifications below ! 
+This is the pre-phase of data preparation and subject-column detection, the next phase uses MTab and a homemade algorithm,available at: https://github.com/Cabi-96/STI-Thesis
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 ## MantistTable Tool
 
 We have 4 implementations of MantisTable developed over time:
