@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mantis: &mantis
+    container_name: mantistable3_web
+    build: .
+    command: bash -c "python manage.py collectstatic --noinput &&
+                      python manage.py makemigrations &&
+                      python manage.py migrate &&
+                      python manage.py runserver 0.0.0.0:8007"
+    volumes:
+      - .:/mantistable
+    ports:
+      - "8007:8007"
+    links:
+      - mongo
+    depends_on:
+      - redis
+      - mongo
+      - celery_worker
+    environment:
+      - REDIS_URI=redis://mantistable_redis_1:6379
+      - DEBUG_MODE=True
+  mongo:
+    container_name: mantistable3_mongo
+    image: mongo
+    command: mongod --port 27021
+    ports:
+      - "27021:27021"
+  redis:
+    container_name: mantistable3_redis
+    image: redis
+    ports:
+      - "6381:6381"
+  celery_worker: &celery
+    container_name: mantistable3_celery_worker
+    <<: *mantis
+    command: celery -A app worker --loglevel=info --autoscale=16,4 -Ofair -Qcelery
+    ports: []
+    depends_on:
+      - redis
+      - mongo
