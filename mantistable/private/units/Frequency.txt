@@ -1,0 +1,6 @@
+"frequency"|"hertz"|"Hz","hertz"
+"frequency"|"millihertz"|"mHz","millihertz"|"0.001"
+"frequency"|"kilohertz"|"kHz","kilohertz"|"1000.0"
+"frequency"|"megahertz"|"MHz","megahertz"|"1000000.0"
+"frequency"|"gigahertz"|"GHz","gigahertz"|"1000000000.0"
+"frequency"|"terahertz"|"THz","terahertz"|"1000000000000.0"

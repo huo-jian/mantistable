@@ -1,0 +1,768 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Edit annotations &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="handsontable-col-opacity">
+        {{ block.super }}
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div id="infoBox">
+        <div id="editAnn"></div>
+
+        {% include 'mantistable/tables/process/handlebars_template/edit_annotations.handlebars' %}
+
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+
+
+        {% if table_datas %}
+            let data = {{table_datas|safe}};
+
+            let container = document.getElementById('handsontable');
+
+            handsontable = new Handsontable(container, {
+                colHeaders: [
+                    {% for header in table.header %}
+                        build_header({{forloop.counter0}}, "{{header}}", false),
+                    {% endfor %}
+                ],
+                columnSorting: true,
+                comments: true,
+                data: data,
+                licenseKey: 'non-commercial-and-evaluation',
+                minSpareRows: 0,
+                preventOverflow: 'horizontal',
+                readOnly: true,
+                sortIndicator: true,
+                selectionMode: 'single',
+                stretchH: 'all',
+                cell: [],
+                height: calcPageContentHeight(),
+            });
+        {% endif %}
+
+        let right_sidebar;
+        {% if right_sidebar %}
+            right_sidebar = {{ right_sidebar | safe }};
+        {% endif %}
+
+        $(function () {
+            openRightSidebar();
+            $("#infoBox .close").remove();
+
+            if (right_sidebar) {
+                {% if winning_concepts %}
+                    let winning_concepts = {{ winning_concepts|safe }};
+
+                    {% if cols_rel %}
+
+                        let cols_rel ={{ cols_rel | safe }};
+                        let rdf_object;
+
+                        $('.relationshipsTable').addClass("highlightCol");
+                        $.each(cols_rel, function (col_idx, col_rel) {
+
+                            if (isNe(col_idx)) {
+                                rdf_object = [splitTypeUri(winning_concepts[col_idx])];
+                            } else if (isLit(col_idx)) {
+
+                                if (lit_cols_data_types) {
+                                    // TODO: remove [0]. Lit Col => only one REGEX type -> datatype must be only one set
+                                    const data = lit_cols_data_types[col_idx][0];
+                                    rdf_object = data.length !== undefined ? data : [data];
+                                }
+                            }
+                            right_sidebar['rdf'][col_idx] =
+                                {
+                                    "col_idx": col_idx,
+                                    "subject": {
+                                        "col_header": table_header[subj_index],
+                                        "type": splitTypeUri(winning_concepts[subj_index]),
+                                    },
+                                    "predicate": {
+                                        'type': splitTypeUri(col_rel)
+                                    },
+                                    "object": {
+                                        "col_header": table_header[col_idx],
+                                        "type": rdf_object
+                                    }
+                                };
+
+                        });
+
+                    {% endif %}
+
+                {% endif %}
+
+                // render template
+                let template_edit_annotations = $("#template_edit_annotations").html();
+                const compiled_template_edit_annotations = Handlebars.compile(template_edit_annotations);
+                $('#editAnn').html(compiled_template_edit_annotations(right_sidebar));
+
+            }
+
+
+            // click on edit-row pencil
+            $(document).on('click', '#edit-annotations .edit:not(.disabled):not(.edit-close)', function () {
+                const currentRow = $(this).closest('tr');
+                const editPanelRow = $(currentRow).next('tr');
+                const editPanel = $(editPanelRow).find('.edit-panel');
+                const obj_idx = currentRow.attr("data-col");
+
+                // open edit form
+                editPanelRow.toggleClass('hiddenRow showRow');
+                editPanel.show(300, function () {
+                    // focus input
+                    $('input').focus();
+                });
+
+                // render input or select
+                render_form(right_sidebar['rdf'][obj_idx], 'subject', isNe(parseInt(obj_idx)));
+
+                // add type class to save button
+                $('.submit-form').attr('data-ann-type', 'subject');
+
+                // add class to current row
+                currentRow.addClass('edit-mode');
+
+                // change current edit button in close button
+                $(this).addClass('edit-close');
+                $(this).find('i').toggleClass('fa-window-close fa-pen-square');
+
+                // disable other row edit button
+                $('.edit:not(.edit-close)').addClass('disabled');
+
+                // reduce opacity of other row
+                $('.relationshipsTable tbody tr').each(function () {
+                    if (!$(this).is($(currentRow)) && !$(this).hasClass('showRow')) {
+                        $(this).addClass('opacity-low');
+
+                    }
+                });
+
+                // set active to subject pencil icon
+                $(currentRow).find('.subject .td-icon-edit').addClass('active');
+
+                // adjust prefix space in input
+                prefixSpace();
+
+                // highlight column in HOT table
+                updateHandsontableSetting($(this).closest('tr').data('col'), subj_index);
+
+                get_hints_mantis(currentRow.find('td.subject'));
+
+                set_active_abstat_triple('subject');
+
+                right_sidebar['message_abstat'] = ' <i class="fas fa-sync fa-spin"></i> Finding suggestions...';
+                render_hints_abstat(right_sidebar);
+
+                get_hints_abstat(currentRow.find('td.subject'));
+
+
+            });
+
+            // click on  close-edit x
+            $(document).on('click', '#edit-annotations .edit-close', function () {
+                const currentRow = $(this).closest('tr');
+                const editPanelRow = $(currentRow).next('tr');
+                const editPanel = $(editPanelRow).find('.edit-panel');
+
+                // close edit form
+                editPanel.hide(300, function () {
+                    editPanelRow.toggleClass('hiddenRow showRow');
+                });
+                currentRow.removeClass('edit-mode');
+
+                // change current close button in edit button
+                $(this).removeClass('edit-close');
+                $(this).find('i').toggleClass('fa-window-close fa-pen-square');
+
+                // Remove active class to pen icon
+                $('.td-icon-edit').removeClass('active');
+
+                // enable row edit button
+                $('.edit').removeClass('disabled');
+
+                // remove opacity-low
+                $('.relationshipsTable tbody tr').removeClass('opacity-low ');
+
+                // remove type class from save button
+                $('.submit-form').attr('data-ann-type', '');
+
+
+                // reset HOT settings
+                resetHandsontableSettings();
+            });
+
+            // click on edit-cell pencil
+            $('#edit-annotations .td-icon-edit').click(function () {
+                const currentTd = $(this).closest('td');
+                const currentTr = currentTd.closest('tr');
+                const obj_idx = currentTr.attr("data-col");
+
+                // render input or select
+                render_form(right_sidebar['rdf'][obj_idx], currentTd.attr('class'), isNe(parseInt(obj_idx)));
+
+                // focus input
+                $('input').focus();
+
+
+                // Set active class to clicked icon
+                $('.td-icon-edit').removeClass('active');
+                $(this).addClass('active');
+
+
+                // add type class to save button
+                $('.submit-form').attr('data-ann-type', currentTd.attr('class'));
+
+
+                // adjust prefix space in input
+                prefixSpace();
+
+                // reset "save" button
+                resetSaveButton();
+
+                get_hints_mantis(currentTd);
+
+                set_active_abstat_triple(currentTd.attr('class'));
+
+                right_sidebar['message_abstat'] = ' <i class="fas fa-sync fa-spin"></i> Finding suggestions...';
+
+                render_hints_abstat(right_sidebar);
+
+                get_hints_abstat(currentTd)
+
+
+            });
+
+            // type into input form
+            $('#edit-annotations ').on('keyup', 'input', function () {
+                const input = $(this);
+
+                if (input.data('prev-value') === undefined) {
+                    input.data('prev-value', input.data('initial-value'));
+                }
+
+                let typeCol = input.parent().find("label").text();
+
+                if (input.data('prev-value').trim() !== input.val().trim()) {
+                    get_abstat_autocomplete_suggestion(typeCol, input.val());
+                }
+
+                input.data('prev-value', input.val());
+            });
+
+            // click on use hint button
+            $('#edit-annotations').on('click', '.use-hint', function (e) {
+                e.preventDefault();
+                const hint = $(this)
+                    .parent()
+                    .find('a')
+                    .text()
+                    .trim();
+
+                if ($('#edit-annotations input').length > 0) {
+                    $('#edit-annotations input').val(hint);
+                }
+
+                if ($('#edit-annotations select').length > 0) {
+                    $('#edit-annotations select').val(hint);
+                }
+                resetSaveButton();
+            });
+
+            // focus/unfocus ul.autocomplete when mouse enter/leave
+            $('#edit-annotations').on('mouseenter', '.autocomplete', function () {
+                $(this).addClass('focus');
+            });
+            $('#edit-annotations').on('mouseleave', '.autocomplete', function () {
+                $(this).removeClass('focus');
+            });
+
+
+            // press up/down key arrow to select one of autocomplete suggestion
+            $(document).on('keydown', function (e) {
+                const autocompleteDiv = $('#edit-annotations .showRow .autocomplete');
+                if (autocompleteDiv.hasClass('isVisible')) {
+                    const firstLi = autocompleteDiv.find('li:first-child');
+                    const lastLi = autocompleteDiv.find('li:last-child');
+                    const liActive = autocompleteDiv.find('li.active');
+                    const liNext = liActive.next();
+                    const liPrev = liActive.prev();
+
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            // if an active li does not exist
+                            if (liActive.length === 0) {
+                                // add active to first li
+                                firstLi.addClass('active');
+                            } else {
+                                // remove active from li
+                                liActive.removeClass('active');
+                                // if active li ha next
+                                if (liNext.length > 0) {
+                                    // add active to next
+                                    liNext.addClass('active');
+                                } else {
+                                    // add active to first li
+                                    firstLi.addClass('active');
+                                }
+                            }
+                            break;
+                        case 'ArrowUp':
+                            // if an active li does not exist
+                            if (liActive.length === 0) {
+                                // add active to last li
+                                lastLi.addClass('active');
+                            } else {
+                                // remove active from li
+                                liActive.removeClass('active');
+                                // if active li ha prev
+                                if (liPrev.length > 0) {
+                                    // add active to prev
+                                    liPrev.addClass('active');
+                                } else {
+                                    // add active to last li
+                                    lastLi.addClass('active');
+                                }
+                            }
+                            break;
+                        case 'Enter':
+                            $('#edit-annotations input').val(liActive.find('.suggestion').text().trim());
+                            $('#edit-annotations input').blur();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+
+            // mouse over autocomplete li
+            $('#edit-annotations').on('mouseenter', '.autocomplete li', function () {
+                $('.autocomplete li').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // click one of autocomplete suggestion
+            $('#edit-annotations').on('click', '.autocomplete li', function (e) {
+                e.preventDefault();
+
+                const autocomplete = $(this).find('.suggestion').text().trim();
+                $('#edit-annotations  input').val(autocomplete);
+                $('#edit-annotations  .autocomplete').removeClass('isVisible');
+                resetSaveButton();
+            });
+
+            // Reset SAVE button style when typing
+            $('#edit-annotations').on('keydown', 'input', function () {
+                resetSaveButton();
+            });
+
+            // Reset SAVE button style when select a new option
+            $('#edit-annotations ').on('change', 'select', function () {
+                resetSaveButton();
+            });
+
+            // prevent ENTER to submit SAVE
+            $('#edit-annotations ').on('focus keyup keypress', 'input', function (e) {
+                // prevent submit form with enter
+                const keyCode = e.keyCode || e.which;
+                if (keyCode === 13) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // click on reset button
+            $('#edit-annotations ').on('click', '.reset-form', function (e) {
+                $('#edit-annotations input').each(function () {
+                    $(this).val($(this).attr('data-initial-value'));
+                });
+
+                $('#edit-annotations select').each(function () {
+                    const initialValue = $(this).attr('data-initial-value');
+                    $(this).find('option').prop('selected', false);
+                    $(this).find(`option[value="${initialValue}"]`).prop('selected', true);
+                });
+
+                if ($('#file').files) {
+                    $('#file').files[0] = null;
+                }
+
+            });
+
+            // click on save button
+            $('#edit-annotations').on('click', '.submit-form', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                const save_button = $(this);
+                animateSendButton(save_button);
+
+                const currentTr = save_button.closest('tr');
+                const obj_idx = currentTr.attr("data-col");
+                const annotation_type = save_button.attr('data-ann-type');
+                let current_input_type;
+                let new_annotation;
+
+                if (save_button.closest('form').find('select').length) {
+                    current_input_type = save_button.closest('form').find('select');
+                    new_annotation = current_input_type.val();
+                } else {
+                    current_input_type = save_button.closest('form').find('input');
+
+                    if (current_input_type.val()) {
+                        new_annotation = save_button.closest('form').find('.prefix').attr('data-prefix') + current_input_type.val();
+                    } else {
+                        new_annotation = "";
+                    }
+                }
+
+                const data_new_annotation = {
+                    'col_idx': annotation_type === 'subject' ? subj_index : obj_idx,
+                    'annotation_type': annotation_type,
+                    'annotation': new_annotation
+                };
+
+                $.ajax({
+                    url: "{% url 'update_annotation' table.id%}",
+                    data: data_new_annotation,
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function (data) {
+                        if (data['is_valid']) {
+                            const new_annotation_info = data['new_annotation']['uri'] ? data['new_annotation'] : splitTypeUri(data['new_annotation']);
+                            const not_found = 'not found';
+
+                            switch (annotation_type) {
+                                case 'subject': {
+                                    // update Json RDF data
+                                    $.each(right_sidebar['rdf'], function (key, triple) {
+                                        if (triple && triple['subject']) {
+                                            triple['subject'].type = new_annotation_info;
+                                        }
+                                    });
+
+                                    // update input data
+                                    current_input_type.attr('data-initial-value', new_annotation_info['label']);
+                                    current_input_type.attr('value', new_annotation_info['label']);
+
+                                    // update td annotation data
+                                    if (current_input_type.val()) {
+                                        $("td.subject").find('.ann').html(`<a target="_blank" title="${new_annotation_info['uri']}" href="${new_annotation_info['uri']}">${new_annotation_info['label']}</a>`);
+
+                                    } else {
+                                        $("td.subject").find('.ann').html(not_found);
+                                    }
+                                    break;
+                                }
+                                case 'predicate': {
+                                    // update Json RDF data
+                                    right_sidebar['rdf'][obj_idx]['predicate'].type = new_annotation_info;
+
+                                    // update input data
+                                    current_input_type.attr('data-initial-value', new_annotation_info['label']);
+                                    current_input_type.attr('value', new_annotation_info['label']);
+
+                                    // update td annotation data
+                                    const annotation_td = $('tr.edit-mode td.predicate');
+                                    if (current_input_type.val()) {
+                                        annotation_td.find('.ann').html(`<a target="_blank" title="${new_annotation_info['uri']}" href="${new_annotation_info['uri']}">${new_annotation_info['label']}</a>`);
+
+                                    } else {
+                                        annotation_td.find('.ann').html(not_found);
+                                    }
+                                    break;
+
+                                }
+                                case 'object': {
+                                    // update Json RDF data
+                                    right_sidebar['rdf'][obj_idx]['object'].type = [new_annotation_info];
+
+                                    // update input data
+                                    current_input_type.attr('data-initial-value', new_annotation_info['label']);
+                                    if (isNe(obj_idx)) {
+                                        current_input_type.attr('value', new_annotation_info['label']);
+                                    }
+
+                                    // update td annotation data
+                                    const annotation_td = $('tr.edit-mode td.object');
+                                    if (current_input_type.val()) {
+                                        annotation_td.find('.ann').html(`<a target="_blank" title="${new_annotation_info['uri']}" href="${new_annotation_info['uri']}">${new_annotation_info['label']}</a>`);
+
+                                    } else {
+                                        annotation_td.find('.ann').html(not_found);
+                                    }
+                                    break;
+
+                                }
+                            }
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+            });
+        });
+
+        function render_form(triple, type, isNe) {
+            let annotations;
+            let template_form_edit;
+            let compiled_template_form_edit;
+
+            if (type !== 'object' || isNe) {
+                annotations = {
+                    'type': type,
+                    'label': triple[type].type.label || triple[type].type[0].label,
+                    'uri': triple[type].type.uri || triple[type].type[0].uri,
+                };
+
+                template_form_edit = $("#template_form_input").html();
+
+            } else {
+                const db_label = triple[type].type[0].label;
+                const datatype = [
+                    {
+                        'label': 'xsd:string',
+                        'in_db': db_label == "xsd:string"
+                    },
+                    {
+                        'label': 'xsd:double',
+                        'in_db': db_label == "xsd:double"
+                    },
+                    {
+                        'label': 'xsd:float',
+                        'in_db': db_label == "xsd:float"
+                    },
+                    {
+                        'label': 'xsd:integer',
+                        'in_db': db_label == "xsd:integer"
+                    },
+                    {
+                        'label': 'xsd:boolean',
+                        'in_db': db_label == "xsd:boolean"
+                    },
+                    {
+                        'label': 'xsd:anyURI',
+                        'in_db': db_label == "xsd:anyURI"
+                    },
+                    {
+                        'label': 'xsd:date',
+                        'in_db': db_label == "xsd:date"
+                    }
+
+                ];
+
+                annotations = {
+                    'datatype': datatype,
+                    'inDB': triple[type].type[0].label
+                };
+
+
+                template_form_edit = $("#template_form_select").html();
+            }
+
+            // render form
+            compiled_template_form_edit = Handlebars.compile(template_form_edit);
+            $('.form-edit').html(compiled_template_form_edit(annotations));
+        }
+
+        // call ABSTAT suggestions api
+        function get_abstat_autocomplete_suggestion(type, input) {
+            const limit = '7';
+            let pos_type;
+            switch (type) {
+                case 'subject':
+                default:
+                    pos_type = 'subj';
+                    break;
+                case 'predicate':
+                    pos_type = 'pred';
+                    break;
+                case 'object':
+                    pos_type = 'obj';
+                    break;
+            }
+
+            const url = `${'http://abstatpro.com/api/v1/SolrSuggestions?'
+            + 'qString='}${input}&qPosition=${pos_type}&rows=${limit}`;
+
+            $.ajax(url)
+                .done(function (results) {
+                    if (results.suggestions) {
+                        $('#edit-annotations .autocomplete').empty();
+
+                        if (results.suggestions.length) {
+                            $('#edit-annotations .autocomplete').addClass('isVisible');
+                        } else {
+                            $('#edit-annotations .autocomplete').removeClass('isVisible');
+                        }
+
+
+                        let autocomplete = [];
+                        $(results.suggestions).each(function (index, value) {
+
+                            autocomplete.push({
+                                'label': removeUrlSchema(value['suggestion']),
+                                'uri': value['suggestion'],
+                                'occurr': value['occurrence']
+                            });
+
+                            {#$('#edit-annotations .autocomplete').append(`<li><span class="suggestion"> ${removeUrlSchema(value.suggestion)} </span><span class="text-small">(occurr.: ${value.occurrence})</span></li>`);#}
+                        });
+                        // render template
+                        let template_autocomplete_abstat = $("#template_autocomplete_abstat").html();
+                        const compiled_template_autocomplete_abstat = Handlebars.compile(template_autocomplete_abstat);
+                        $('.autocomplete').html(compiled_template_autocomplete_abstat(autocomplete));
+                    }
+
+                })
+                .fail(function () {
+                    console.log("error");
+                });
+        }
+
+        function get_hints_mantis(currentTd) {
+            // get hints
+            {% if candidate_concepts %}
+                let candidate_concepts = {{ candidate_concepts|safe }};
+                let result = [];
+                let edit_type = currentTd.attr("class");
+                let col_index = currentTd.closest('tr').attr('data-col')
+
+                if (edit_type === 'subject') {
+                    $.each(candidate_concepts[subj_index], function (key, value) {
+                        result.push(
+                            {
+                                'concept': key,
+                                'freq': value
+                            }
+                        );
+                    });
+                } else if (edit_type === 'object') {
+                    $.each(candidate_concepts[col_index], function (key, value) {
+                        result.push({
+                            'concept': key,
+                            'freq': value
+                        });
+                    });
+                }
+
+                result.sort(function (a, b) {
+                    var x = a.occurrency, y = b.occurrency;
+                    return x < y ? 1 : x > y ? -1 : 0;
+                });
+
+                right_sidebar['hint_mantis'] = result;
+                {#currentCellOrColumn["candidate_concepts"] = result;#}
+
+                // render template
+                let template_hint_mantis = $("#template_hint_mantis").html();
+                const compiled_template_hint_mantis = Handlebars.compile(template_hint_mantis);
+                $('.hint-mantis').html(compiled_template_hint_mantis(right_sidebar));
+
+            {% endif %}
+        }
+
+        function get_hints_abstat(currentTd) {
+            let edit_type = currentTd.attr("class");
+            let col_index = currentTd.closest('tr').attr('data-col');
+            let current_item = right_sidebar['rdf'][col_index];
+
+            if (edit_type !== 'object' || isNe(col_index)) {
+                $('.hint-abstat').show();
+                let queryParam;
+
+                switch (edit_type) {
+                    case 'subject': {
+                        queryParam = `pred=${current_item['predicate'].type.uri}&obj=${current_item['object'].type[0].uri}`;
+                        break
+                    }
+                    case 'predicate': {
+                        queryParam = `subj=${current_item['subject'].type.uri}&obj=${current_item['object'].type[0].uri}`;
+                        break
+                    }
+                    case 'object': {
+                        queryParam = `subj=${current_item['subject'].type.uri}&pred=${current_item['predicate'].type.uri}`;
+                        break;
+                    }
+
+                }
+
+                const summary = '02c3f749-cbe4-4f36-b1d8-0145588fc202';
+                const enrichWithSPO = 'false';
+                const limit = '10';
+                const subtype = 'internal';
+
+                let url = `${'http://abstatpro.com/api/v1/browse?'
+                + 'enrichWithSPO='}${enrichWithSPO}&limit=${limit}&subtype=${subtype}&summary=${summary}&${queryParam}`;
+
+                url = url.replace(/#/g, '%23');
+
+                let result = [];
+                $.ajax(url)
+                    .done(function (results) {
+
+                        if (results['akps'].length) {
+                            right_sidebar['message_abstat'] = "";
+                            $.each(results['akps'], function (key, value) {
+                                result.push(
+                                    {
+                                        'uri': value[edit_type],
+                                        'label': removeUrlSchema(value[edit_type], 'not found'),
+                                        'freq': value['frequency']
+                                    }
+                                );
+                            });
+
+                        } else {
+                            right_sidebar['message_abstat'] = 'No suggestions found.';
+                        }
+
+                        right_sidebar['hint_abstat'] = result;
+
+
+                        render_hints_abstat(right_sidebar);
+
+
+                    })
+                    .fail(function () {
+                        console.log("error");
+                        right_sidebar['message_abstat'] = '<span class="red">Abstat service is not available. Try later.</span>';
+                        render_hints_abstat(right_sidebar);
+                    });
+            } else {
+                $('.hint-abstat').hide();
+            }
+        }
+
+        function render_hints_abstat(data) {
+            // render template
+            let template_hint_abstat = $("#template_hint_abstat").html();
+            const compiled_template_hint_abstat = Handlebars.compile(template_hint_abstat);
+            $('.hint-abstat .hints').html(compiled_template_hint_abstat(data));
+        }
+
+        function set_active_abstat_triple(item) {
+            $('.hint-abstat .complementary span').removeClass("active");
+            $('.hint-abstat .complementary span i').removeClass('fa-lock-open').addClass('fa-lock');
+            $('.hint-abstat .complementary').find(`.${item}`).addClass('active');
+            $('.hint-abstat .complementary').find(`.${item} i`).toggleClass('fa-lock-open fa-lock');
+        }
+
+
+    </script>
+
+{% endblock %}

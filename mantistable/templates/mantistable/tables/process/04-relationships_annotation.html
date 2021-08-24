@@ -1,0 +1,64 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Predicate Annotation &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="handsontable-col-opacity">
+        {{ block.super }}
+    </div>
+{% endblock %}
+
+{% block infoBox_content %}
+    <div id="predicate-annotation">
+        <table class="relationshipsTable table ">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Predicate</th>
+                <th>Object</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            </tbody>
+        </table>
+
+    </div>
+    {% include 'mantistable/tables/process/handlebars_template/relationships_annotation.handlebars' %}
+
+{% endblock %}
+
+
+
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        {% if table_datas %}
+            let data = {{table_datas|safe}};
+
+            let container = document.getElementById('handsontable');
+
+            handsontable = new Handsontable(container, {
+                colHeaders: [
+                    {% for header in table.header %}
+                        build_header({{forloop.counter0}}, "{{header}}"),
+                    {% endfor %}
+                ],
+                columnSorting: true,
+                comments: true,
+                data: data,
+                licenseKey: 'non-commercial-and-evaluation',
+                minSpareRows: 0,
+                preventOverflow: 'horizontal',
+                readOnly: true,
+                sortIndicator: true,
+                selectionMode: 'single',
+                stretchH: 'all',
+                cell: [],
+                height: calcPageContentHeight(),
+            });
+        {% endif %}
+    </script>
+{% endblock %}

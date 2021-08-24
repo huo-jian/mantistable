@@ -1,0 +1,51 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Column Analysis  &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block infoBox_content %}
+    <div id="column-analysis"></div>
+
+ {% include 'mantistable/tables/process/handlebars_template/column_analysis.handlebars' %}
+
+
+{% endblock %}
+
+
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        {% if table_datas %}
+            let data = {{table_datas|safe}};
+
+            let container = document.getElementById('handsontable');
+
+            handsontable = new Handsontable(container, {
+                colHeaders: [
+                    {% for header in table.header %}
+                        build_header({{forloop.counter0}}, "{{header}}"),
+                    {% endfor %}
+                ],
+                columnSorting: true,
+                comments: true,
+                data: data,
+                licenseKey: 'non-commercial-and-evaluation',
+                minSpareRows: 0,
+                preventOverflow: 'horizontal',
+                readOnly: true,
+                sortIndicator: true,
+                selectionMode: 'single',
+                stretchH: 'all',
+                cells: function (row, col, prop) {
+                    let cellProperties = {};
+                    cellProperties.renderer = colorColumnsByType; // uses function directly
+                    return cellProperties;
+                },
+                height: calcPageContentHeight(),
+
+            });
+
+        {% endif %}
+    </script>
+{% endblock %}

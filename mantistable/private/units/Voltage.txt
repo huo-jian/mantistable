@@ -1,0 +1,5 @@
+"voltage"|"volt"|"V","volt"
+"voltage"|"megavolt"|"MV","megavolt"|"1000000.0"
+"voltage"|"kilovolt"|"kV","kilovolt"|"1000.0"
+"voltage"|"millivolt"|"mV","millivolt"|"0.001"
+"voltage"|"microvolt"|"µV","microvolt"|"1.0E-6"

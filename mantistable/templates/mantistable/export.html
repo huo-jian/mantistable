@@ -1,0 +1,429 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block title %}
+    Export annotations | {{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    <div id="download">
+        <h1>Download annotations</h1>
+    {% if current_process_all_task_id %}
+                <div class="warning-message">
+                    Annotations are in progress. Please, wait to download them.
+                </div>
+            {% endif %}
+        <div class="table-responsive">
+            <table class="table  table-bordered sde-table">
+                <thead>
+                <tr>
+                    <th class="name">
+                        Available download
+                    </th>
+
+                    <th class="empty download"></th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {#                <tr>#}
+                {#                    <td>#}
+                {#                        All annotations#}
+                {#                    </td>#}
+                {##}
+                {#                    <td class="download">#}
+                {#                        <a href="#" class="export" data-exportGS="all" data-toggle="modal"#}
+                {#                           data-target="#export_format_selection">#}
+                {#                            <i class="fas fa-download"></i>#}
+                {#                        </a>#}
+                {#                    </td>#}
+                {#                </tr>#}
+
+                <tr>
+                    <td>
+                        Your tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="NONE" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        T2D tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="T2D" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Limaye200 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="Limaye200" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        limaye tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="limaye" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        semantification tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="semantification" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        t2 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="t2" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        semr1 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="semr1" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        semr2 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="semr2" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        semr3 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="semr3" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        semr4 tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="semr4" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        wiki tables annotations
+                    </td>
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="wiki" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>
+                        Semantic Web Challenge
+                        <span class="text-small block">
+                            on Tabular Data to Knowledge Graph Matching
+                        </span>
+
+                    </td>
+
+                    <td class="download">
+                        {% if current_process_all_task_id %}
+
+                            <div class="btn disabled">
+                                <i class="fas fa-download"></i>
+                            </div>
+
+                        {% else %}
+
+                            <a href="#" class="export" data-exportGS="CHALLENGE" data-toggle="modal"
+                               data-target="#export_format_selection">
+                                <i class="fas fa-download"></i>
+                            </a>
+
+                        {% endif %}
+
+
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+{% endblock %}
+
+{% block modal %}
+    <div id="export_format_selection" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Choose a export format</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="export-type rdf">
+                        <span class="label-block">RDF</span>
+                        <a href="{% url 'export' %}" data-exportType="RDF" data-exportFormat="xml"
+                           class="btn btn-sm btn-outline-primary">
+                            XML
+                        </a>
+                        <a href="{% url 'export' %}" data-exportType="RDF" data-exportFormat="nt"
+                           class="btn btn-sm btn-outline-primary">
+                            NT
+                        </a>
+                        <a href="{% url 'export' %}" data-exportType="RDF" data-exportFormat="turtle"
+                           class="btn btn-sm btn-outline-primary">
+                            Turtle
+                        </a>
+                        <!-- JSON-LD NOT WORKING (NEEDS A RDFLIB EXTENSION PROBABLY)
+                        <a href="{% url 'export' %}" data-exportType="RDF" data-exportFormat="jsonld"
+                           class="btn btn-sm btn-outline-primary">
+                            Json-LD
+                        </a>
+                        !-->
+                    </div>
+
+                    <div class="export-type csv">
+                        <span class="label-block">CSV</span>
+                        <a href="{% url 'export' %}" data-exportType="CTA"
+                           class="btn btn-sm btn-outline-primary">
+                            Type Annotation (CTA)
+                        </a>
+                        <a href="{% url 'export' %}" data-exportType="CPA"
+                           class="btn btn-sm btn-outline-primary">
+                            Predicate Annotation (CPA)
+                        </a>
+                        <a href="{% url 'export' %}" data-exportType="CEA"
+                           class="btn btn-sm btn-outline-primary">
+                            Entity Annotation (CEA)
+                        </a>
+                    </div>
+
+                </div>
+
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+        $(document).ready(function () {
+
+            $('.export').on('click', function () {
+                const current_gs_btn = $(this);
+                const export_gs = current_gs_btn.attr("data-exportGS");
+                console.log(export_gs);
+
+                if (export_gs === 'CHALLENGE') {
+                    $("#export_format_selection .rdf").hide();
+                } else {
+                    $("#export_format_selection .rdf").show();
+                }
+
+                $("#export_format_selection .btn").each(function () {
+                    const current_format_btn = $(this);
+                    let export_type = current_format_btn.attr("data-exportType");
+                    let export_format = current_format_btn.attr("data-exportFormat");
+                    let base_url = {% url 'export' %};
+                    let query = {};
+                    if (export_format) {
+                        query = {
+                            'export_gs': export_gs,
+                            'export_type': export_type,
+                            'export_format': export_format
+                        }
+                    } else {
+                        query = {
+                            'export_gs': export_gs,
+                            'export_type': export_type,
+                        }
+                    }
+
+                    current_format_btn.attr("href", `${base_url}?${$.param(query)}`);
+
+                });
+
+            });
+
+        });
+    </script>
+
+{% endblock %}

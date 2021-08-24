@@ -1,0 +1,250 @@
+{% verbatim %}
+
+<script id="template_edit_annotations" type="text/x-handlebars-template">
+    <div class="step-name"><span>{{ step_name }}</span></div>
+
+    <div id="edit-annotations">
+        <table class="relationshipsTable table ">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Predicate</th>
+                <th>Object</th>
+                <th class="empty"></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {{#each rdf }}
+
+                <tr data-col="{{ col_idx }}">
+                    <td class="subject">
+                        <div class="td-content">
+                            <span class="col-name">{{ subject.col_header }}</span>
+
+                            <div class="ann">
+                                {{#if subject.type.uri }}
+                                    <a target="_blank" title="{{ subject.type.uri }}"
+                                       href="{{ subject.type.uri }}">
+                                        {{ subject.type.label }}
+                                    </a>
+                                {{ else }}
+                                    {{ subject.type }}
+                                {{/if }}
+                            </div>
+
+                        </div>
+                        <i class="td-icon-edit fas fa-pen"></i>
+                    </td>
+                    <td class="predicate">
+                        <div class="td-content">
+                            <div class="ann">
+                                {{#if predicate.type.uri }}
+                                    <a target="_blank" title="{{ predicate.type.uri  }}"
+                                       href="{{ predicate.type.uri  }}">
+                                        {{ predicate.type.label }}
+                                    </a>
+                                {{ else }}
+                                    {{ predicate.type }}
+                                {{/if }}
+                            </div>
+                        </div>
+                        <i class="td-icon-edit fas fa-pen"></i>
+                    </td>
+                    <td class="object">
+                        <div class="td-content">
+                            <span class="col-name">{{ object.col_header }}</span>
+                            <div class="ann">
+                                {{#each object.type}}
+                                    {{#if this.uri }}
+
+                                        <a target="_blank" title="{{ this.uri }}"
+                                           href="{{ this.uri }}">
+                                            {{ this.label }}
+                                        </a>
+
+                                    {{ else }}
+                                        {{ this }}
+                                    {{/if }}
+                                {{/each }}
+                            </div>
+                        </div>
+                        <i class="td-icon-edit fas fa-pen"></i>
+                    </td>
+                    <td>
+                        <a href="#" class="btn edit noLink">
+                            <i class="fas fa-pen-square fa-fw"></i> </a>
+                    </td>
+                </tr>
+
+                <tr class="hiddenRow" data-col="{{ col_idx }}">
+                    <td colspan="4" class="edit-form">
+                        <div class="edit-panel">
+
+                            <form autocomplete="off">
+
+                                <div class="form-edit"></div>
+
+                                <div class="hint-mantis"></div>
+
+                                <div class="hint-abstat">
+                                    <div class="block">
+
+                                        <div class="bold">
+                                            <i class="far fa-lightbulb"></i>
+                                            Suggestions from
+                                            <a title="ABSTAT" class="underline" target="_blank"
+                                               href="http://abstat.disco.unimib.it/">ABSTAT</a>
+                                        </div>
+                                        <div class="complementary">
+
+                                            <span class="subject active">
+                                                <i class="fas fa-lock-open fa-fw"></i>subject
+                                            </span>
+
+                                            <span class="predicate">
+                                                <i class="fas fa-lock fa-fw"></i>predicate
+                                            </span>
+
+                                            <span class="object">
+                                                <i class="fas fa-lock fa-fw"></i>object
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+                                    <div class="hints">
+                                        <i class="fas fa-sync fa-spin"></i> Finding suggestions...
+                                    </div>
+
+                                </div>
+
+                                <div class="text-right">
+                                    <button type="button" class="reset-form btn btn-secondary tiny">Reset</button>
+                                    <button type="submit" class="submit-form btn btn-primary tiny"><span>Save</span>
+                                    </button>
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+
+            {{/each }}
+
+            </tbody>
+        </table>
+    </div>
+
+</script>
+
+<script id="template_form_input" type="text/x-handlebars-template">
+
+    <div class="form-group material prefix-dbo">
+        <input id="annotation" type="text" class="form-control" name="annotation"
+               data-initial-value="{{ label }}"
+               value="{{ label }}" required="" autofocus="">
+        <label for="annotation">{{ type }}</label>
+        <span class="prefix" title="http://dbpedia.org/ontology/"
+              data-prefix="http://dbpedia.org/ontology/">DBO:</span>
+
+        <ul class="autocomplete list-unstyled"></ul>
+
+    </div>
+
+</script>
+
+<script id="template_form_select" type="text/x-handlebars-template">
+
+    <div class="form-group dropdown material ">
+        <select name="datatype" required
+                data-initial-value="{{inDB}}">
+            <option class="first"></option>
+            {{#each datatype}}
+                <option value="{{label}}" {{#if in_db }} selected {{/if }} >
+                    {{label}}
+                </option>
+            {{/each}}
+        </select>
+        <label for="datatype">datatype</label>
+    </div>
+</script>
+
+<script id="template_hint_mantis" type="text/x-handlebars-template">
+    {{#if hint_mantis }}
+
+        <div class="hints">
+            <div class="block">
+                <div class="bold">
+                    <i class="far fa-lightbulb"></i>
+                    Suggestions from MantisTable
+                </div>
+            </div>
+
+            {{#each hint_mantis }}
+                <div class="hint">
+                    <div class="slide">
+                        <a target="_blank" title="http://dbpedia.org/ontology/{{ concept }}"
+                           href="http://dbpedia.org/ontology/{{ concept }}">
+                            {{ concept }}
+                        </a>
+                        <span class="text-small">
+                            (freq: {{freq}})
+                        </span>
+                    </div>
+
+                    <span class="use-hint">
+                        <i title="use this" class="fas fa-check-square"></i>
+                    </span>
+                </div>
+            {{/each }}
+
+        </div>
+
+    {{/if }}
+</script>
+
+<script id="template_hint_abstat" type="text/x-handlebars-template">
+
+    {{#if message_abstat }}
+
+        {{{ message_abstat }}}
+
+    {{else }}
+        {{#each hint_abstat }}
+            <div class="hint">
+                <div class="slide">
+                    <a target="_blank" title="{{ uri }}"
+                       href=" {{uri  }}">
+                        {{ label }}
+                    </a>
+                    <span class="text-small">
+                        (freq: {{freq}})
+                    </span>
+                </div>
+
+                <span class="use-hint">
+                    <i title="use this" class="fas fa-check-square"></i>
+                </span>
+            </div>
+        {{/each }}
+    {{/if }}
+
+</script>
+
+<script id="template_autocomplete_abstat" type="text/x-handlebars-template">
+    {{#each this}}
+        <li>
+            <span class="suggestion">
+                {{label}}
+            </span>
+            <span class="text-small">
+                (occurr.:{{occurr}})
+            </span>
+        </li>
+    {{/each}}
+</script>
+
+
+{% endverbatim %}

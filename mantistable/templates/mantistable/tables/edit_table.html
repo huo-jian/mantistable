@@ -1,0 +1,37 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block title %}
+    {{ block.super }}
+    Create Tables
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    {% if uploadingTable %}
+        {% include "mantistable/shared/loading.html" %}
+    {% else %}
+        Show table here
+    {% endif %}
+
+    <div class="modal modal-danger fade" id="modal-danger" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">Do you really want to delete this table?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>All data will be erased. This cannot be undone. Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                    <button type="button" id="delete" class="btn btn-outline pull-right" data-dismiss="modal">Delete!</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

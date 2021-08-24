@@ -1,0 +1,31 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Table  &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block run_again %}{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+        {# HANDSONTABLE #}
+        let data = {{table_datas|safe}};
+
+        let container = document.getElementById('handsontable');
+        handsontable = new Handsontable(container, {
+            colHeaders: {{ table.header|safe }},
+            columnSorting: true,
+            data: data,
+            licenseKey: 'non-commercial-and-evaluation',
+            minSpareRows: 0,
+            preventOverflow: 'horizontal',
+            readOnly: true,
+            sortIndicator: true,
+            selectionMode: 'single',
+            stretchH: 'all',
+             height: calcPageContentHeight(),
+        });
+    </script>
+{% endblock %}

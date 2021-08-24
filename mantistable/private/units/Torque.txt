@@ -1,0 +1,4 @@
+"torque"|"newtonMetre"|"Nm","N.m","N·m","newtonmetre"
+"torque"|"newtonMillimetre"|"Nmm","newtonmillimetre"|"0.001"
+"torque"|"newtonCentimetre"|"Ncm","newtoncentimetre"|"0.001"
+"torque"|"poundFoot"|"ftlb-f","ftlbf","lbft"|"1.3558179483314"

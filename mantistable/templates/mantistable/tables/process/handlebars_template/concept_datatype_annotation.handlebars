@@ -1,0 +1,182 @@
+{% verbatim %}
+<script id="template_conceptAnn_header" type="text/x-handlebars-template">
+
+    <div class="header">
+
+        {{#if winning_concept}}
+            <div class="winning-concept">
+                <span class="bold key">Winning concept:</span>
+                <span class="value text-big">
+                    <a target="_blank" title="{{ winning_concept }}"
+                       href="{{ winning_concept }}">
+                        {{ winning_concept }}
+                    </a>
+                </span>
+            </div>
+        {{/if }}
+
+        {{#if candidate_concepts}}
+            <ul class="list-unstyled indent spacer">
+                {{#each candidate_concepts}}
+                    <li>
+                        <a target="_blank" title="http://dbpedia.org/ontology/{{ concept }}"
+                           href="http://dbpedia.org/ontology/{{ concept }}">
+                            {{ concept }}
+                        </a>
+                        <span class="text-small">(Occ: {{ occurrency }})</span>
+                    </li>
+                {{/each}}
+            </ul>
+        {{/if }}
+
+        {{#if lit_cols_data_types}}
+            <div class="winning-concept">
+                <span class="bold key">Winning datatypes:</span>
+                <ul class="list-unstyled">
+                    {{#each lit_cols_data_types }}
+                        <li>
+                            <a class="value text-big" target="_blank" title="{{ uri }}"
+                               href="{{ uri }}">
+                                {{label }}
+                            </a>
+                        </li>
+                    {{/each }}
+                </ul>
+                </span>
+            </div>
+        {{/if }}
+    </div>
+
+</script>
+
+<script id="template_conceptAnn_cell" type="text/x-handlebars-template">
+
+    <div class="cell">
+
+        <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+
+            <li class="active">
+                <a href="#entities" data-toggle="tab">
+                    Candidate entities
+                </a>
+            </li>
+
+            <li>
+                <a href="#concepts" data-toggle="tab">
+                    Candidate concepts
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="tab-content">
+            <div id="entities" class="tab-pane active">
+
+                <div>
+                    {{#each annotations }}
+                        <div class="candidate">
+                            <div class="index">
+                                {{#eq winning "true" }}
+                                    <i class="fas fa-check text-green"></i>
+                                {{else }}
+                                    <i class="fas fa-times text-red"></i>
+                                {{/eq }}
+                                {{offset @index }}
+                            </div>
+
+                            <div class="resource">
+                                <a target="_blank"
+                                   href="{{ entity }}"
+                                   title="{{ entity }}">
+                                    {{ entity }}
+                                </a>
+
+                                <div class="block">
+                                    <div>
+                                        <span class="key">Edit Distance Score:</span>
+                                        <span class="value">
+                                            {{ edit_distance_score }}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <span class="key">Row Context Score:</span>
+                                        <span class="value">
+                                            {{ row_context_score }}
+                                        </span>
+                                        <span class="text-small ">
+                                            ( Normalized: {{ row_context_score_normalized }})
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <span class="key">Cell Context Score:</span>
+                                        <span class="value">
+                                            {{ cell_context_score }}
+                                        </span>
+                                        <span class="text-small">
+                                            (Normalized: {{ cell_context_score_normalized }})
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <span class="key">Bonus Score:</span>
+                                        <span class="value">
+                                            0
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+                                        <span class="key">Final score:</span>
+                                        <span class="value">
+                                            {{ final_score }}
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    {{/each }}
+
+                </div>
+
+            </div>
+
+            <div id="concepts" class="tab-pane">
+                {{#each annotations }}
+                    {{#each type}}
+
+                        <div class="candidate">
+
+
+                            <div class="index">
+
+                                {{offset @index }}
+
+                            </div>
+
+                            <div class="resource">
+
+                                <span class="value">
+                                    <a target="_blank" href="{{ this }}" title="{{ this }}">
+                                        {{ this }}
+                                    </a>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    {{/each }}
+                {{/each }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</script>
+
+{% endverbatim %}

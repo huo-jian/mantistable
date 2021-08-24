@@ -1,0 +1,46 @@
+{% with request.resolver_match.url_name as url_name %}
+    <div id="start-step" class="step-box initialState {% if url_name == 'start' %} active{% endif %}">
+
+        <a href="{% url 'start' table.id %}">
+            <i class="far fa-square"></i>
+            <span class="text">Start</span>
+        </a>
+
+    </div>
+
+    {% for key, step in table.process.phases.items %}
+
+        <div id="{{ step.routeName }}-step"
+             class="step-box {{ step.status | lower }} {% if url_name == step.routeName %} active{% endif %}">
+            <!-- TODO: function call !-->
+            {% if step.next %}
+                <a href="#" class="btn btn-primary next"
+                   title="Run next process">
+                    NEXT
+                </a>
+            {% endif %}
+
+            <a href="{% url step.routeName table.id %}" title="{{ step.name }}"
+               {% if step.status == 'TODO' %}class="disabled"{% endif %}>
+                <div class="step">
+                    <span class="phase">{{ forloop.counter0 }}</span>
+                </div>
+                <span class="text">{{ step.name }}</span>
+            </a>
+        </div>
+
+    {% endfor %}
+    <div class="step-box editAnn {% if url_name == 'editAnnotations' %} active {% endif %}{% if table.global_status != 'DONE' %}disabled{% else %}enabled{% endif %}  ">
+        <!-- TODO: function call !-->
+
+        <a href="{% url 'editAnnotations' table.id %}" title="edit annotations"
+           {% if table.global_status != 'DONE' %}class="disabled"{% endif %}>
+            <i class="fas fa-edit"></i>
+            <span class="text">Edit</span>
+        </a>
+
+    </div>
+
+{% endwith %}
+
+

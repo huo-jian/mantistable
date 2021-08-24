@@ -1,0 +1,63 @@
+{% for table in tables %}
+    <tr id="{{ table.id }}">
+        <td class="globalStatus {{ table.global_status }}"></td>
+        <td class="table-name">
+            <strong>{{ table.name }}</strong>
+        </td>
+        <td class="table-gs">
+            <span class="block bold">{{ table.gs_type }}</span>
+        </td>
+        <td class="table-date">{{ table.pub_date | date:"d/m/Y - H:i:s" }}</td>
+        <td class="table-date">{{ table.last_edit_date | date:"d/m/Y - H:i:s" }}</td>
+        <td>
+
+            {% for key, step in table.process.phases.items %}
+                <span class="status {{ step.routeName }}">
+                    <i class="{{ step.status }}"></i>
+                    {{ step.name }}
+                </span>
+            {% endfor %}
+        </td>
+        <td class="table-time">
+            <span class="time"> {{ table.process.execution_time }}</span>
+            <span class="text-small">min</span>
+        </td>
+        <td class="table-buttons">
+            <div class="btn-group">
+                {# TODO: enable edit table info (useful?)#}
+                {# <a href="{% url 'editTable' table.id %}" class="btn btn-secondary  btn-xs">#}
+                {# <i class="fas fa-edit"></i>#}
+                {# Edit#}
+                {# </a>#}
+                <a href="{% url 'start' table.id %}" class="btn btn-secondary btn-xs">
+                    <i class="fas fa-cog"></i>
+                    View & Process
+                </a>
+            </div>
+        </td>
+        <td class="table-buttons">
+            <div class="btn-group">
+                {% if table.global_status == "DONE" %}
+                <a href="{% url 'download_table_csv' table.id %}" class="btn btn-secondary btn-xs">
+                    <i class="fas fa-download"></i>
+                    S-Sorted CSV
+                </a>
+                {% else %}
+                <a href="{% url 'download_table_raw' table.id %}" class="btn btn-secondary btn-xs">
+                    <i class="fas fa-download"></i>
+                    Raw CSV
+                </a>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+{% endfor %}
+
+{% if not tables and searching %}
+    <tr>
+        <td colspan="8" class="text-center text-big">
+            No tables found
+        </td>
+    </tr>
+
+{% endif %}

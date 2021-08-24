@@ -1,0 +1,286 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block title %}
+    List Tables |  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    {% if tables and not searching %}
+        <div id="list-table" class="table-responsive">
+
+            <table class="table table-hover table-bordered sde-table">
+
+                <thead>
+                <tr>
+                    <th class="globalStatus"></th>
+                    <th class="table-name">
+                        Name
+                        <div class="search">
+                            <form role="search">
+                                <div class="form-group material condensed">
+                                    <input type="text" id="search" class="form-control search-bar" name="search"
+                                           required="">
+                                    <label for="search">Search by table name</label>
+                                    <i class="fas fa-times btn-cancel"></i>
+                                </div>
+                            </form>
+                        </div>
+                    </th>
+                    <th class="table-gs">Gold Standard
+                        <div class="form-group dropdown material condensed">
+                            <select id="goldStandard" class="form-control selectpicker" required="">
+                                <option></option>
+                                <option value="none">No one</option>
+                                <option value="T2D">T2D</option>
+                                <option value="Limaye200">Limaye200</option>
+                                <option value="Challenge">Challenge</option>
+                            </select>
+                            <label for="goldStandard">Gold Standard</label>
+                        </div>
+                    </th>
+                    <th class="table-date">Insert date</th>
+                    <th class="table-date">Last Edit</th>
+                    <th class="table-status">
+                        Status
+                        <div class="filter-wrapper">
+                            <div class="filter btn-group btn-group-sm">
+                                <div class="btn TODO" data-filter="TODO"></div>
+                                <div class="btn DOING" data-filter="DOING"></div>
+                                <div class="btn DONE" data-filter="DONE"></div>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="table-time">Execution Time</th>
+                    <th class="table-buttons">
+                        Actions
+                        <div>
+                            <div class="btn-group">
+                                <a id="deleteAll"
+                                   class="btn btn-danger btn-sm {% if current_process_all_task_id %} disabled {% endif %}"
+                                   data-toggle="modal"
+                                   data-target="#modal-delete">
+                                    <i class="fa fa-trash"></i>
+                                    <span>Delete all</span>
+                                </a>
+                                <a id="processAll"
+                                   class="btn btn-primary btn-sm {% if current_process_all_task_id %} disabled {% endif %}">
+                                    <i class="fa fa-cogs"></i>
+                                    <span>Process all</span>
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </th>
+                    <th class="table-buttons">
+                        Download
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="table-list-data">
+                {% include 'mantistable/table-list.html' %}
+                </tbody>
+
+            </table>
+
+            {% if tables.has_prevtable_state_changedious or tables.has_next or tables.has_previous %}
+                <div class="pagination-wrapper">
+                    <span class="margin-r-15 ">
+                        {{ tables.start_index }}-{{ tables.end_index }} of {{ tables_count }}
+                    </span>
+
+                    <ul class="pagination pagination-sm pull-right">
+                        {% if tables.has_previous %}
+                            <li><a href="?page=1">&laquo;</a></li>
+                            <li><a href="?page={{ tables.previous_page_number }}">{{ tables.previous_page_number }}</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="active"><a href="?page={{ tables.number }}">{{ tables.number }}</a></li>
+
+                        {% if tables.has_next %}
+                            <li><a href="?page={{ tables.next_page_number }}">{{ tables.next_page_number }}</a></li>
+                            <li><a href="?page={{ tables.paginator.num_pages }}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        </div>
+    {% else %}
+        <div class="text-center text-big margin">
+            <div class="text-huge bold">
+                No tables loaded.
+            </div>
+            <div class="spacer text-big">
+
+                You can start
+                <a href="{% url 'createTables' %}" class="btn btn-primary btn-lg">
+                    uploading some tables
+                </a>
+
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+        $(document).ready(function () {
+
+
+            // remove pagination space if there is no pagination
+            if (!$('.pagination-wrapper').length) {
+                $('#list-table').addClass('noPagination');
+            }
+
+
+            // add PROCESSING class to Global Status if a step is in progress
+            add_processing_status();
+
+            let delay = (() => {
+                let timer = 0;
+                return function (callback, ms) {
+                    clearTimeout(timer);
+                    timer = setTimeout(callback, ms);
+                };
+            })();
+
+            // filter on keyup (with some delay)
+            $('#search').on('keyup', function () {
+                delay(function () {
+                    filter_tables();
+                }, 500);
+
+            });
+
+            // add cancel icon when typing in in SEARCH bar
+            $('.search input').on('keyup', function () {
+                const searchVal = $('input#search').val();
+                if (searchVal !== '') {
+                    $('.search .btn-cancel').show();
+                } else {
+                    $('.search .btn-cancel').hide();
+                }
+            });
+
+            // clear SEARCH when click on cancel icon
+            $('.search .btn-cancel').click(function () {
+                $('.search input').val('');
+                $('.search .btn-cancel').hide();
+                filter_tables();
+            });
+
+            $('#goldStandard').on('change', function () {
+                filter_tables();
+            });
+
+            // filter click
+            $('.filter .btn').click(function () {
+                if ($(this).hasClass('active')) {
+                    $('.filter .btn').removeClass('active');
+                } else {
+                    $('.filter .btn').removeClass('active');
+                    $(this).addClass('active');
+                }
+
+                filter_tables();
+            });
+
+            // click on PROCESS ALL
+            $("a#processAll").on('click', function () {
+                if (!$(this).hasClass("disabled")) {
+                    $("#deleteAll, #processAll").addClass("disabled");
+                    $.ajax({
+                        url: "{% url 'process_all' %}",
+                        data: {},
+                        dataType: 'json',
+                        type: 'GET',
+                        success: function (data) {
+                        },
+                        error: function () {
+                            $("#deleteAll, #processAll").removeClass("disabled");
+                        }
+                    });
+                }
+            });
+
+            // click on DELETE ALL
+            $("a#deleteAll").on('click', function () {
+
+                if (!$(this).hasClass("disabled")) {
+                    $("#deleteAll, #processAll").addClass("disabled");
+                    $.ajax({
+                        url: "{% url 'delete_all' %}",
+                        data: {},
+                        dataType: 'json',
+                        type: 'GET',
+                        success: function (data) {
+                        },
+                        error: function () {
+                            $("#deleteAll, #processAll").removeClass("disabled");
+                        }
+                    });
+                }
+
+            });
+
+        });
+
+        function filter_tables() {
+
+            let input = $('.search input').val();
+            let gs = $('#goldStandard').val();
+            let status = $('.btn.active').attr('data-filter') || "";
+            console.log(input, gs, status);
+
+            $.ajax({
+                url: '/tables/',
+                data: {
+                    'search': input,
+                    'gs': gs,
+                    'status': status,
+                    'page': '{{ request.GET.page }}' || 1
+                },
+                dataType: 'json',
+                type: 'GET',
+                success: function (data) {
+                    //hide pagination if something is filtered
+                    if (input == "" && gs == "" && status == "") {
+                        $('.pagination-wrapper').show();
+                        $('#list-table').removeClass('noPagination');
+                    } else {
+                        $('.pagination-wrapper').hide();
+                        $('#list-table').addClass('noPagination');
+                    }
+
+                    $('#table-list-data').fadeTo('fast', 0).promise().then(() => {
+                        $('#table-list-data').html(data['table_list_html']);
+                        $('#table-list-data').fadeTo('fast', 1);
+                        add_processing_status();
+                    });
+                }
+            });
+
+        }
+
+        function add_processing_status() {
+            $('#table-list-data tr').each(function () {
+                const tr = $(this);
+                if (tr.find('.status i').hasClass('DOING')) {
+                    tr.find('.globalStatus').addClass('processing');
+                }
+            });
+        }
+
+
+    </script>
+
+{% endblock %}
+
+{% block console %}
+{% endblock %}

@@ -1,0 +1,8 @@
+"power"|"watt"|"W","watt","Βατ"
+"power"|"kilowatt"|"kW","kilowatt"|"1000.0"
+"power"|"milliwatt"|"mW","milliwatt"|"0.001"
+"power"|"megawatt"|"MW","megawatt"|"1000000.0"
+"power"|"gigawatt"|"GW","gigawatt"|"1000000000.0"
+"power"|"horsepower"|"hp","horsepower","ίπποι"|"745.72218"
+"power"|"pferdestaerke"|"PS","pferdestaerke"|"735.49875"
+"power"|"brakeHorsepower"|"bhp","brake horsepower"|"745.7"

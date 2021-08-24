@@ -1,0 +1,63 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Data Preparation  &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="handsontable-col-paired">
+        {{ block.super }}
+    </div>
+{% endblock %}
+
+{% block infoBox_content %}
+    <div id="data-preparation"></div>
+
+     {% include 'mantistable/tables/process/handlebars_template/data_prepration.handlebars' %}
+
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+        {% if table_datas %}
+            let data = {{table_datas|safe}};
+
+            let table_comments = [];
+            {% if table_comments %}
+                table_comments = {{table_comments|safe}};
+
+                $.each(table_comments, function (key, value) {
+                    value['comment']['value'] = `<em>This cell has been normalized</em>
+                                    <br/><strong>Old value:</strong> ${value['comment']['value']}
+                                    <br/><span class='readMore'>Click the cell to read more...</span>`
+                });
+
+            {% endif %}
+
+            let container = document.getElementById('handsontable');
+            handsontable = new Handsontable(container, {
+                colHeaders: [
+                    {% for header in table.header %}
+                        "{{header}}", "Type of \"{{header}}\"",
+                    {% endfor %}
+                ],
+                columnSorting: true,
+                comments: true,
+                data: data,
+                licenseKey: 'non-commercial-and-evaluation',
+                minSpareRows: 0,
+                preventOverflow: 'horizontal',
+                readOnly: true,
+                sortIndicator: true,
+                selectionMode: 'single',
+                stretchH: 'all',
+                cell: table_comments,
+                height: calcPageContentHeight(),
+            });
+
+        {% endif %}
+
+    </script>
+{% endblock %}

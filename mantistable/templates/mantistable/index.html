@@ -1,0 +1,99 @@
+{% extends "mantistable/base.html" %}
+
+{% block container %}
+        {% load static %}
+
+    <div id="home">
+
+        <div class="header">
+            <div class="wrapper">
+                <img src="{% static 'mantistable/images/mantis.png' %}" class="logo" alt="logo"/>
+                <h1 class="title"><span class="bold">Mantis</span>Table</h1>
+                <div class="subhead">Semantic Table Interpretation</div>
+            </div>
+        </div>
+
+        <div class="features">
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <figure class="preview">
+                            <img src="{% static 'mantistable/images/Preview.png' %}"/>
+                        </figure>
+                    </div>
+                    <div class="col-xs-12 ">
+                        <div class="feature">
+                            MantisTable is a tool based on a <strong> fully automated approach </strong> for a
+                            <br>
+                            complete <em>Semantic Table Interpretation</em> process.
+                            <br>
+                            It deals with annotating each element of a table
+                            <br>
+                            and allow to visually explore each phase of the whole process.
+
+                            <div class="center">
+                                <a class="btn" href="{% url 'home' %}">Start now to annotate</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 ">
+                        <div class="unimib flex">
+
+                            <div class="disco">
+                                <a href="https://www.disco.unimib.it/it" target="_blank" title="Visit DISCo website">
+                                    <img src="{% static 'mantistable/images/disco.png' %}" alt="DISCo"/>
+                                </a>
+                            </div>
+
+                            <div class="lab">
+                                <a href="http://inside.disco.unimib.it/" target="_blank"
+                                   title="Visit Insid&s LAB website">
+                                   <span class="title">
+                                       Insid&s<br/>
+                                        LAB
+                                    </span>
+                                    <span class="text">
+                                        Dipartimento di Informatica, Sistemistica e Comunicazione <br/>
+                                        Università degli Studi di Milano-Bicocca <br/>
+                                        Viale Sarca, 336 - 20126, Milano | tel. 02 6448 7801
+                                    </span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="bitbucket col-xs-12">
+                        <a href="https://bitbucket.org" target="_blank" title="Visit Bitbucket">
+                        <span class="logo-sm">
+                            <img src="{% static 'mantistable/images/bitbucket.png' %}" alt="bitbucket"/>
+                        </span>
+                            <span class="text">
+                            Bitbucket
+                        </span>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        $('body').removeClass('sde-fixed');
+    </script>
+{% endblock %}
+

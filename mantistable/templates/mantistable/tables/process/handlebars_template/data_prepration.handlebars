@@ -1,0 +1,28 @@
+{% verbatim %}
+<script id="template_dataPreparation" type="text/x-handlebars-template">
+    <div>
+        <span class="bold block">
+            Initial cell value:
+        </span>
+        <span class="italic">{{ cell_value_before }}</span>
+    </div>
+
+    {{#if cell_transformation }}
+        <div>
+            <div class="bold text-big ">Transformations</div>
+            <ul>
+                {{#each cell_transformation}}
+                    <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/if }}
+
+    <div>
+        <span class="bold block">
+            Value after normalization:
+        </span>
+        <span class="italic">{{ cell_title }}</span>
+    </div>
+</script>
+{% endverbatim %}

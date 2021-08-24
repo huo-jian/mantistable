@@ -1,0 +1,588 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block title %}
+    Upload a table | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="twoSide-layout">
+        <div class="container-fluid">
+            <div class="row flex">
+
+                <div class="col col-md-6">
+                    <div class="container-form">
+
+                        <h1>Upload a table</h1>
+                        <div class="text-center line-separator">
+
+                            <div id="loadGS" class="flex align-center">
+                                <div>
+                                <div>
+                                    <a id="t2d" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.t2d is True %}
+                                       delete
+                                            {% endif %}">
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.t2d is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                T2D <span class="block text-small"> Gold Standard</span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="progress {% if standard_loaded.t2d %}loaded{% endif %} ">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a id="limaye200" href="#"
+                                       class="btn
+                                            {% if standard_loaded.limaye200 is True %}
+                                      delete
+                                            {% endif %}">
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+
+                                                {% if standard_loaded.limaye200 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="text-left">
+                                                    Limaye200 <span class="block text-small"> Gold Standard</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="progress {% if standard_loaded.limaye200 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+
+                                    </a>
+
+                                </div>
+
+                                <div>
+                                    <a id="challenge" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.challenge is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.challenge is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                Round2 <span class="block text-small"> Challenge</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.challenge %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div><div>
+
+                                <div>
+                                    <a id="limaye" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.limaye is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.limaye is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                limaye <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.limaye %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a id="semantification" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.semantification is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.semantification is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                semantification <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.semantification %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a id="wiki" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.wiki is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.wiki is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                wiki <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.wiki %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a id="t2" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.t2 is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.t2 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                t2 <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.t2 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div><div>
+                                <div>
+                                    <a id="semr1" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.semr1 is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.semr1 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                semr1 <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.semr1 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a id="semr2" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.semr2 is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.semr2 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                semr2 <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.semr2 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a id="semr3" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.semr3 is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.semr3 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                semr3 <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.semr3 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a id="semr4" href="#"
+
+                                       class="btn
+                                            {% if standard_loaded.semr4 is True %}
+                                       delete
+                                            {% endif %}">
+
+
+                                        <div class="flex align-middle">
+                                            <div class="margin-r-5">
+                                                {% if standard_loaded.semr4 is True %}
+                                                    <i class="far fa-trash-alt fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-upload fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-left">
+                                                semr4 <span class="block text-small"> </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress {% if standard_loaded.semr4 %}loaded{% endif %}">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            </div>
+
+                        </div>
+
+                        <form id="form" enctype="multipart/form-data" method="post" action="{% url 'createTables' %}">
+                            {% csrf_token %}
+                            <div class="form-group material">
+                                {{ form.table_name }}
+                                {{ form.table_name.label_tag }}
+                            </div>
+
+                            <div class="form-group material file {% if invalidfile %}error{% endif %}">
+                                {{ form.json_file }}
+                                {{ form.json_file.label_tag }}
+                                {% if invalidfile %}
+                                    <div class="error-message">
+                                        Insert correct file
+                                    </div>
+                                {% endif %}
+
+                            </div>
+<!--                            <fieldset style="color:grey" disabled="disabled">-->
+<!--                                Gold Standard-->
+                                <div class="form-group dropdown material">
+                                    {{ form.gs_type }}
+                                    {{ form.gs_type.label_tag }}
+                                </div>
+<!--                            </fieldset>-->
+                            <button type="submit" id="submit" class="btn btn-primary btn-block">Submit
+                                <!--<span class="glyphicon glyphicon-share-alt"></span>-->
+                            </button>
+
+
+                        </form>
+
+                        {% if validfile %}
+                            <div class="alert alert-success" role="alert">
+                                TABLE INSERTED CORRECTLY
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col col-md-6 background">
+
+                    <h3>File types supported</h3>
+
+                    <p>
+                        At the moment, Mantistable only supports tables in <strong>JSON</strong> format.</p>
+
+
+                    <p>JSON (JavaScript Object Notation) is a standard text-based
+                        format for representing structured data based on JavaScript object syntax.</p>
+
+
+                    <pre id="pre">
+<strong>JSON example</strong>
+[
+  {
+    "MOUNTAIN": "Mount Everest",
+    "HEIGHT IN METERS": "8,848",
+    "RANGE": "Himalayas",
+    "CONQUERED ON": "May 29, 1953",
+    "COORDINATES": "27.98785, 86.92502609999997",
+    "URL": "https://en.wikipedia.org/wiki/Mount_Everest"
+  },
+  {
+    "MOUNTAIN": "K-2 (Godwin Austin)",
+    "HEIGHT IN METERS": "8,611",
+    "RANGE": "Karakoram",
+    "CONQUERED ON": "July 31, 1954",
+    "COORDINATES": "35.8799875,76.51510009999993",
+    "URL": "https://en.wikipedia.org/wiki/K2"
+  },
+  {
+    "MOUNTAIN": "Kanchenjunga",
+    "HEIGHT IN METERS": "8,597",
+    "RANGE": "Himalayas",
+    "CONQUERED ON": "May 25, 1955",
+    "COORDINATES": "27.7024914,88.14753500000006",
+    "URL": "https://en.wikipedia.org/wiki/Kangchenjunga"
+  }
+]                    </pre>
+
+
+                    <p>
+
+                        If your data is in a different format, you have to convert it first. </p>
+                    <p>Some tools you can use: </p>
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>CSV to JSON</th>
+                            <th>HTML to JSON</th>
+                            <th>Excel to JSON</th>
+
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        <tr>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <a href="https://www.csvjson.com/csv2json" target="_blank">
+                                            www.csvjson.com
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="http://www.convertcsv.com/csv-to-json.htm" target="_blank">
+                                            www.convertcsv.com
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <a href="https://tools.fromdev.com/table-to-json-converter.html"
+                                           target="_blank">
+                                            tools.fromdev.com
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="http://convertjson.com/html-table-to-json.htm" target="_blank">
+                                            www.convertjson.com
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <a href="https://codebeautify.org/excel-to-json" target="_blank">
+                                            www.codebeautify.org
+                                        </a>
+                                    </li>
+
+
+                                </ul>
+                            </td>
+
+                        </tr>
+                        </tbody>
+                    </table>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block console %}
+{% endblock %}
+
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+
+        $(function () {
+
+            $('#loadGS .btn').on('click', function () {
+                const current_button = $(this);
+                const gs = current_button.attr('id');
+                if (current_button.hasClass('disabled')) {
+                    return false;
+                }
+
+                if (current_button.hasClass('delete')) {
+                    delete_table(gs);
+                } else {
+                    load_table(gs);
+                }
+
+            });
+            $(document).on('click', '.btn.disabled', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+            });
+        });
+
+        function load_table(type) {
+            $("#loadGS .btn").addClass("disabled");
+            $.ajax({
+                url: "{% url 'load_gs_table' %}",
+                method: 'GET',
+                data: {
+                    type: type
+                },
+                success: function (data) {
+                    //showLoading();    //TODO: Make it non-blocking
+                }
+            });
+        }
+
+        function delete_table(type) {
+            $.ajax({
+                url: "{% url 'delete_gs_table' %}",
+                method: 'GET',
+                data: {
+                    type: type
+                },
+                success: function (data) {
+                    //showLoading();    //TODO: Make it non-blocking
+                }
+            });
+        }
+    </script>
+
+{% endblock %}

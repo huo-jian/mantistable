@@ -1,0 +1,57 @@
+{% extends "mantistable/tables/process/base-process.html" %}
+
+{% block title %}
+    Concept and Datatype Annotation  &quot;{{ table.name }}&quot; |  {{ block.super }}
+{% endblock %}
+
+{% block infoBox_content %}
+    <div id="concept-annotation"></div>
+     {% include 'mantistable/tables/process/handlebars_template/concept_datatype_annotation.handlebars' %}
+
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        {% if table_datas %}
+            let data = {{table_datas|safe}};
+
+            let table_comments = [];
+            {% if table_comments %}
+                table_comments = {{table_comments|safe}};
+
+                $.each(table_comments, function (key, value) {
+                    value['comment']['value'] = `Find <strong> ${value['comment']['num_entities']}</strong> entities
+                                    and <strong> ${value['comment']['num_concepts']} </strong> concepts
+                                    <br/><span class='readMore'>Click the cell to read more...</span>`
+                });
+
+            {% endif %}
+
+            let container = document.getElementById('handsontable');
+
+            handsontable = new Handsontable(container, {
+                colHeaders: [
+                    {% for header in table.header %}
+                        build_header({{forloop.counter0}}, "{{header}}"),
+                    {% endfor %}
+                ],
+                columnSorting: true,
+                comments: true,
+                data: data,
+                licenseKey: 'non-commercial-and-evaluation',
+                minSpareRows: 0,
+                preventOverflow: 'horizontal',
+                readOnly: true,
+                sortIndicator: true,
+                selectionMode: 'single',
+                stretchH: 'all',
+                cell: table_comments,
+                height: calcPageContentHeight(),
+
+            });
+
+        {% endif %}
+
+    </script>
+{% endblock %}

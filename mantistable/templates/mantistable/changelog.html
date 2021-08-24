@@ -1,0 +1,44 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block title %}
+    Changelog | {{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    <div id="changelog">
+        <h1>Changelog</h1>
+
+        <div class="panel-group accordion" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" href="#collapseOne"
+                           aria-expanded="true" aria-controls="collapseOne">
+                            1.0 - 07-09-2019
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                     aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <ul>
+                            <li>
+                                Python porting
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block console %}
+{% endblock %}

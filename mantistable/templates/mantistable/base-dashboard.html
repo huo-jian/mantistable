@@ -1,0 +1,120 @@
+{% extends "mantistable/base.html" %}
+
+{% block container %}
+    {% include "mantistable/shared/loading.html" %}
+    <div class="wrapper">
+
+        <header class="main-header">
+            <a href="{% url 'home' %}" class="logo">
+                <span class="logo-mini"><b>M</b>T</span>
+                <span class="logo-lg"><b>Mantis</b>Table</span>
+            </a>
+
+            <nav class="navbar navbar-static-top">
+                <a href="{% url 'home' %}" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                    <span class="panel-icon"> </span>
+                </a>
+
+                {% block table_info %}
+                    {{ block.super }}
+
+                    <ul class="tableInfo">
+                        <li id="tables_count" class="stats">
+                            <span class="number">{{ tables_count }}</span>
+                            <span class="description">tables</span>
+                        </li>
+                        <li id="processing_tables_completed" class="stats">
+                            <span class="number">{{ tables_completed }}</span>
+                            <span class="description">tables completed</span>
+                        </li>
+                        <li id="processing_tables_count" class="stats">
+                            <span class="number">{{ tables_in_progress }}</span>
+                            <span class="description">tables in progress</span>
+                        </li>
+                    </ul>
+                {% endblock %}
+
+            </nav>
+        </header>
+
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <ul class="sidebar-menu" data-widget="tree">
+                    {% with request.resolver_match.url_name as url_name %}
+                        <li {% if url_name == 'home' %}class="active"{% endif %}>
+                            <a href="{% url 'home' %}">
+                                <i class="fas fa-table"></i>
+                                <span>List Tables</span>
+                            </a>
+                        </li>
+                        <li {% if url_name == 'createTables' %}class="active"{% endif %}>
+                            <a href="{% url 'createTables' %}">
+                                <i class="fas fa-plus"></i>
+                                <span>Insert Tables</span>
+                            </a>
+                        </li>
+
+                        <li {% if url_name == 'export' %}class="active"{% endif %}>
+                            <a href="{% url 'export' %}">
+                                <i class="fas fa-download"></i>
+                                <span>Export</span></a>
+                        </li>
+
+                        <li {% if url_name == 'changelog' %}class="active"{% endif %}>
+                            <a href="{% url 'changelog' %}">
+                                <i class="far fa-file-alt"></i>
+                                <span>Changelog</span>
+                            </a>
+                        </li>
+
+                        {#                        <li>#}
+                        {#                            <a href="/admin">#}
+                        {#                                <i class="fas fa-tools"></i>#}
+                        {#                                <span>Admin</span>#}
+                        {#                            </a>#}
+                        {#                        </li>#}
+                        {#                        <li>#}
+                        {#                            <a href="{% url 'test' %}">#}
+                        {#                                <i class="fas fa-tools"></i>#}
+                        {#                                <span>Query Test</span>#}
+                        {#                            </a>#}
+                        {#                        </li>#}
+
+
+                        </ul>
+                    {% endwith %}
+                </ul>
+
+            </section>
+        </aside>
+
+        <div class="content-wrapper">
+            {% block process %}{% endblock %}
+
+            <section class="content">
+                {% block content %}{% endblock %}
+            </section>
+        </div>
+
+        {% block console %}
+            <footer class="sticky-footer close-console">
+
+                <div id="toggle-console" class="button pull">
+
+                    <i class="fa fa-terminal" aria-hidden="true"></i>
+                    Console
+                    <i class="fa fa-caret-up up-down-arrow" aria-hidden="true"></i>
+
+                </div>
+
+                <div class="scrollable-area">
+                    <div class="scrollable-area">
+                    <pre id="console">
+                    </pre>
+                    </div>
+                </div>
+
+            </footer>
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,781 @@
+{% extends "mantistable/base-dashboard.html" %}
+
+{% block table_info %}
+    <ul class="tableInfo">
+        <li class="name">{{ table.name }}</li>
+        <li class="stats">
+            <span class="number">{{ table.num_cols }}</span>
+            <span class="description">columns</span>
+        </li>
+        <li class="stats">
+            <span class="number">{{ table.num_rows }}</span>
+            <span class="description">rows</span>
+        </li>
+        <li class="stats">
+            <span class="number smaller">
+
+                {% if table.gs_type == 'NONE' %}
+                    -
+                {% else %}
+                    {{ table.gs_type }}
+                {% endif %}
+
+            </span>
+            <span class="description">Gold Standard</span>
+        </li>
+        {% if  request.resolver_match.url_name != 'start'  and request.resolvannotationser_match.url_name != 'editAnnotations' %}
+            <li class="runningTime stats">
+                <span class="number">{{ process_time }} </span>
+                <span class="description">Time to process</span>
+            </li>
+        {% endif %}
+    </ul>
+
+
+    <div class="buttons">
+        {#    TODO: enable run again#}
+        {#        {% block run_again %}#}
+        {#            <a href="{% url 'runAgainPhase' table.id %}?phaseName={{ phase_name }}" type="button"#}
+        {#               class="btn btn-secondary btn-sm tiny rerun" title="Run again this step">#}
+        {#                Run again#}
+        {#            </a>#}
+        {#        {% endblock %}#}
+        {% block reset %}
+            <a href="{% url 'resetProcess' table.id %}" type="button"
+               class="btn alert-danger btn-sm tiny reset {% if loading %} disabled {% endif %}"
+               title="Reset entire process"
+
+            >
+                Reset
+            </a>
+        {% endblock %}
+
+    </div>
+{% endblock %}
+
+{% block process %}
+    {% if table.process %}
+        <div class="multiStep-horizontal">
+            {% include 'mantistable/tables/process/multistep.html' %}
+
+            <!-- close arrow-->
+            <i class="fas fa-chevron-up close-multistep"></i>
+
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if loading %}
+        <div id="processing">
+            <div class="flex align-center">
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span class="text">Processing...</span>
+            </div>
+            <span class="text-tiny">While waiting, you can explore MantisTable as you want</span>
+        </div>
+
+    {% else %}
+
+        <div id="handsontable"></div>
+        <aside class="control-sidebar control-sidebar-light">
+            <!-- Content of the sidebar goes here -->
+            {% block sidebar %}
+                <div id="infoBox">
+                    <button type="button" class="close" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
+                    <div id="generalInfo"></div>
+                    {% verbatim %}
+                    <script id="template_generalInfo_cell" type="text/x-handlebars-template">
+                        <p class="cell-title">{{ cell_title }}</p>
+
+                        <div class="cell-coords">
+                            <div>
+                                <span class="key">Column header:</span>
+                                <span class="value">{{ cell_header }} </span>
+                            </div>
+
+                            <div class="flex">
+                                <div class="coord">
+                                    <span class="key">Row index (no sorted):</span>
+                                    <span class="value">{{ cell_row_coord }}</span>
+                                </div>
+                                <div class="coord">
+                                    <span class="key">Column index:</span>
+                                    <span class="value">{{ cell_col_coord }}</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="step-name"><span>{{ step_name }}</span></div>
+
+
+                    </script>
+
+                    <script id="template_generalInfo_header" type="text/x-handlebars-template">
+                        <p class="cell-title">{{ header }}</p>
+
+                        <div class="step-name"><span>{{ step_name }}</span></div>
+
+
+                    </script>
+                    {% endverbatim %}
+
+
+                    {% block infoBox_content %}{% endblock %}
+
+                </div>
+            {% endblock %}
+        </aside>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script>
+        let phaseName = "{{phase_name}}";
+
+        let chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/chat/{{ table.id }}/');
+
+        chatSocket.onmessage = function (e) {
+            let data = JSON.parse(e.data);
+            let message = data['message'];
+            let message_type = data['message_type']
+            let datetime = data['datetime']
+
+            document.querySelector('#console').innerHTML += ('(' + message_type + ') ' + datetime + ': ' + message + '\n');
+        };
+
+        chatSocket.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // =====================================================================
+        // TODO: Refactoring needed...
+
+        let internalSocketProcess = new WebSocket('ws://' + window.location.host + '/ws/internal/{{ table.id }}/');
+        internalSocketProcess.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const command_name = data["type"];
+
+            switch (command_name) {
+                case "completed_phase": {
+                    const phase = data['phase'];
+                    console.log("completed_phase", phase);
+                    $(".btn.reset").removeClass("disabled");
+
+                    if (phaseName == phase) {
+                        // I'm viewing the same phase that just completed "munching" data. Useful?
+                        location.reload();
+                    } else {
+                        update_process_nav();
+                    }
+
+                    break;
+                }
+                case "table_state_changed": {
+                    const process_state = data['process_state'];
+
+                    update_process_nav();
+                    console.log("table_state_changed", process_state);
+                    break;
+                }
+                default: {
+                    // Ignore
+                    console.log("Unknown command: " + command_name);
+                    break;
+                }
+            }
+        };
+
+        internalSocketProcess.onclose = function (e) {
+            console.error('Server socket closed unexpectedly');   // NOTE: What happens if server closes connection
+        };
+
+        function update_process_nav() {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'update_process_nav'  table.id%}',
+                success: function (response) {
+                    $(".multiStep-horizontal").empty().append(response);
+                    const current_url_name = '{{ request.resolver_match.url_name }}';
+                    $(`#${current_url_name}-step`).addClass('active');
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        };
+
+    </script>
+
+    <script>
+        // global var
+        let neCols = "",
+            litCols = "",
+            lit_cols_regex_types = "",
+            lit_cols_data_types = "",
+            subj_index = "";
+        let table_header = [],
+            neColsIndexes = [],
+            litColsIndexes = [];
+
+        {% if  table.header%}
+            table_header = {{ table.header|safe }};
+        {% endif %}
+
+        {% if ne_cols %}
+            neCols = {{ ne_cols|safe }};
+        {% endif %}
+
+        {% if  lit_cols%}
+            litCols = {{ lit_cols|safe }};
+        {% endif %}
+
+        {% if  lit_cols_regex_types%}
+            lit_cols_regex_types = {{ lit_cols_regex_types|safe }};
+        {% endif %}
+
+        {% if lit_cols_data_types %}
+            lit_cols_data_types = {{ lit_cols_data_types|safe }};
+        {% endif %}
+        if (neCols.length) {
+
+            neColsIndexes = neCols.map((ne) => {
+                return ne.index;
+            });
+
+            {% if subject_col is not None %}
+                subj_index = {{ subject_col }};
+            {% endif %}
+
+        }
+
+        if (litCols.length) {
+            litColsIndexes = litCols.map((lit) => {
+                return lit.index
+            });
+        }
+
+
+        // listener to mouse over cell.
+        // default comment (textArea) is hidden and replaced with tmp div
+        // in order to support html formatting
+        Handsontable.hooks.add('beforeOnCellMouseOver', function (events, coord, td) {
+
+            $('#divComment').remove();
+
+            // hack to remove multiple instance of comments
+            if ($('.htComments').length > 1) {
+                $('.htCommentsContainer .htComments:not(:last-child)').remove();
+            }
+
+            const commentsPlugin = handsontable.getPlugin('comments');
+
+            if (commentsPlugin !== undefined) {
+                const comment = commentsPlugin.getCommentAtCell(coord.row, coord.col);
+
+                if (comment !== undefined || comment != null) {
+                    $('textarea.htCommentTextArea').hide();
+
+                    const divComment = `<div id='divComment' class='htCommentTextArea'>${comment}</div>`;
+
+                    $(divComment).appendTo('.htComments');
+                }
+            }
+        });
+
+        // listener to click on cell.
+        Handsontable.hooks.add('afterOnCellMouseDown', function (event, coords) {
+            handsontable.setCellMeta(coords.row, coords.col, 'className', '');
+
+            const sortedPlugin = handsontable.getPlugin('columnSorting');
+
+            let coordsCol = coords.col;
+            let coordsRow;
+
+            if (sortedPlugin !== 'undefined' && sortedPlugin.isSorted()) {
+                coordsRow = handsontable.runHooks('modifyRow', coords.row);
+            } else {
+                coordsRow = coords.row;
+            }
+
+            let validClick = false;
+
+            // if a cell or a header with show info button
+            // has been clicked
+            if ($(event.srcElement).hasClass('htCommentCell')
+                || (coords.row === -1 && handsontable.getColHeader(coordsCol).indexOf('show-more') > -1)) {
+                validClick = true;
+            }
+
+            if (validClick) {
+                /*Session.set('clickedRow', coordsRow);
+                Session.set('clickedCol', coordsCol);*/
+
+                openRightSidebar();
+
+                {% if right_sidebar %}
+                    let coord;
+
+                    if (coordsRow === -1) {
+                        // Header
+                        coord = `col${coordsCol}`;
+                    } else {
+                        // Cell
+                        coord = `row${coordsRow}col${coordsCol}`;
+                    }
+
+                    let right_sidebar = {{ right_sidebar | safe }};
+
+                    if (right_sidebar) {
+                        const currentCellOrColumn = right_sidebar[coord];
+
+                        // GENERAL INFO
+                        let template_generalInfo;
+
+                        if (coordsRow === -1) {
+                            // Header
+                            template_generalInfo = $("#template_generalInfo_header").html();
+                        } else {
+                            // Cell
+                            template_generalInfo = $("#template_generalInfo_cell").html();
+                        }
+
+                        const compiled_template_generalInfo = Handlebars.compile(template_generalInfo);
+                        $('#generalInfo').html(compiled_template_generalInfo(currentCellOrColumn));
+
+
+                        // DATA PREPARATION
+                        if (currentCellOrColumn['step_name'] == "{{ table.DATA_PREPARATION }}") {
+                            const template_dataPreparation = $('#template_dataPreparation').html();
+                            const compiled_template_dataPreparation = Handlebars.compile(template_dataPreparation);
+                            $('#data-preparation').html(compiled_template_dataPreparation(currentCellOrColumn));
+                        }
+
+                        // COLUMN ANALYSIS
+                        if (currentCellOrColumn['step_name'] == "{{ table.COLUMN_ANALYSIS }}") {
+                            let template_columnAnalysis;
+
+                            if (isNe(coordsCol)) {
+                                template_columnAnalysis = $('#template_columnAnalysis_ne').html();
+
+                                // TODO: should be passed from view?
+                                currentCellOrColumn["column_type"] = "Named Entity";
+
+                                {%  if ne_cols_scores %}
+                                    let neColsScore = {{ ne_cols_scores|safe }};
+                                    $.each(neColsScore[coordsCol], function (key, value) {
+                                        if ($.isNumeric(value)) {   // TODO: Remove. Hack to bypass a feature for the paper but useful for production code
+                                            neColsScore[coordsCol][key] = value.toFixed(1);
+                                        }
+                                    });
+                                    currentCellOrColumn["column_score"] = neColsScore[coordsCol];
+                                {% endif %}
+
+                                if (isSubj(coordsCol)) {
+                                    currentCellOrColumn["result_icon"] = "fas fa-check text-green";
+                                } else {
+                                    currentCellOrColumn["result_icon"] = "fas fa-times text-red";
+                                }
+                            } else if (isLit(coordsCol)) {
+                                template_columnAnalysis = $('#template_columnAnalysis_lit').html();
+                                currentCellOrColumn["column_type"] = "Literal";
+
+                                {% if  lit_cols_freq_types %}
+                                    // google chart
+                                    let dataset = [];
+
+                                    let type_freq = {{ lit_cols_freq_types | safe }};
+                                    type_freq = type_freq[coordsCol];
+                                    $.each(type_freq, function (key, value) {
+                                        dataset.push(
+                                            [value.name || 'no type identified', value.rate * 100]
+                                        );
+                                    });
+
+                                    chartSetup(dataset);
+                                {% endif %}
+                            }
+
+
+                            const compiled_template_columnAnalysis = Handlebars.compile(template_columnAnalysis);
+                            $('#column-analysis').html(compiled_template_columnAnalysis(currentCellOrColumn));
+
+                        }
+
+                        // CONCEPT ANNOTATION
+                        if (currentCellOrColumn['step_name'] == "{{ table.CONCEPT_ANNOTATION }}") {
+                            let template_conceptAnnotation;
+                            if (coordsRow === -1) {
+                                // Header
+                                template_conceptAnnotation = $('#template_conceptAnn_header').html();
+
+                                if (isNe(coordsCol)) {
+                                    {% if winning_concepts %}
+                                        let winning_concepts = {{ winning_concepts|safe }};
+                                        currentCellOrColumn["winning_concept"] = winning_concepts[coordsCol];
+                                    {% endif %}
+
+                                    {% if candidate_concepts %}
+                                        let candidate_concepts = {{ candidate_concepts|safe }};
+                                        let result = [];
+                                        $.each(candidate_concepts[coordsCol], function (key, value) {
+                                            result.push({
+                                                "concept": key,
+                                                "occurrency": value
+                                            })
+                                        });
+
+                                        result.sort(function (a, b) {
+                                            var x = a.occurrency, y = b.occurrency;
+                                            return x < y ? 1 : x > y ? -1 : 0;
+                                        });
+
+                                        currentCellOrColumn["candidate_concepts"] = result;
+                                    {% endif %}
+                                }
+
+                                if (isLit(coordsCol)) {
+
+                                    if (lit_cols_data_types) {
+                                        // TODO: remove [0]. Lit Col => only one REGEX type -> datatype must be only one set
+                                        const data = lit_cols_data_types[coordsCol][0];
+                                        currentCellOrColumn["lit_cols_data_types"] = data.length !== undefined ? data : [data];
+                                    }
+                                }
+
+                            } else {
+                                // Cell
+                                template_conceptAnnotation = $('#template_conceptAnn_cell').html();
+                            }
+
+                            const compiled_template_conceptAnnotation = Handlebars.compile(template_conceptAnnotation);
+                            $('#concept-annotation').html(compiled_template_conceptAnnotation(currentCellOrColumn));
+
+                        }
+
+                        // PREDICATE ANNOTATION || ENTITY LINKING
+                        if (currentCellOrColumn['step_name'] == "{{ table.PREDICATE_ANNOTATION }}"
+                            || currentCellOrColumn['step_name'] == "{{ table.ENTITY_LINKING }}") {
+                            resetHandsontableSettings();
+                            {% if winning_concepts %}
+                                let winning_concepts = {{ winning_concepts|safe }};
+
+                                {% if cols_rel %}
+
+                                    let cols_rel ={{ cols_rel | safe }};
+                                    currentCellOrColumn['rdf'] = [];
+                                    let rdf_object;
+                                    if (isSubj(coordsCol)) {
+                                        $('.relationshipsTable').addClass("highlightCol");
+                                        $.each(cols_rel, function (col_idx, col_rel) {
+
+                                            if (isNe(col_idx)) {
+                                                rdf_object = [splitTypeUri(winning_concepts[col_idx])];
+                                            } else if (isLit(col_idx)) {
+
+                                                if (lit_cols_data_types) {
+                                                    // TODO: remove [0]. Lit Col => only one REGEX type -> datatype must be only one set
+                                                    const data = lit_cols_data_types[col_idx][0];
+                                                    rdf_object = data.length !== undefined ? data : [data];
+                                                }
+                                            }
+
+                                            currentCellOrColumn['rdf'].push(
+                                                {
+                                                    "col_idx": col_idx,
+                                                    "subject": {
+                                                        "col_header": table_header[subj_index],
+                                                        "type": splitTypeUri(winning_concepts[subj_index]),
+                                                    },
+                                                    "predicate": splitTypeUri(col_rel),
+                                                    "object": {
+                                                        "col_header": table_header[col_idx],
+                                                        "type": rdf_object
+                                                    }
+                                                });
+
+
+                                        });
+                                    } else {
+
+                                        $('.relationshipsTable').removeClass("highlightCol");
+                                        if (isNe(coordsCol)) {
+                                            rdf_object = [splitTypeUri(winning_concepts[coordsCol])];
+                                        } else if (isLit(coordsCol)) {
+                                            if (lit_cols_data_types) {
+
+                                                const data = lit_cols_data_types[coordsCol][0];
+                                                rdf_object = data.length !== undefined ? data : [data];
+                                            }
+                                        }
+
+
+                                        currentCellOrColumn['rdf'].push(
+                                            {
+                                                "col_idx": coordsCol,
+                                                "subject": {
+                                                    "col_header": table_header[subj_index],
+                                                    "type": splitTypeUri(winning_concepts[subj_index]),
+                                                },
+                                                "predicate": splitTypeUri(cols_rel[coordsCol]),
+                                                "object": {
+                                                    "col_header": table_header[coordsCol],
+                                                    "type": rdf_object
+                                                }
+                                            });
+
+
+                                        updateHandsontableSetting(coordsCol, subj_index);
+                                    }
+                                {% endif %}
+
+
+                                const template_predicateAnn = $('#template_predicateAnn').html();
+                                const compiled_template_predicateAnn = Handlebars.compile(template_predicateAnn);
+                                $('#predicate-annotation tbody').html(compiled_template_predicateAnn(currentCellOrColumn));
+
+                            {% endif %}
+                        }
+                    }
+
+                {% endif %}
+
+            } else {
+                {% if  request.resolver_match.url_name != 'editAnnotations'%}
+                    closeRightSidebar();
+                {% endif %}
+            }
+        });
+
+
+        $(function () {
+            $('body').addClass('hasMultiStep inner-control-sidebar');
+
+
+            //change process class when doing
+            $(".multiStep-horizontal").on('click', ".btn.next", function () {
+                $(".btn.reset").addClass("disabled");
+
+                const next_btn = $(this)
+                let step_name = next_btn.closest(".step-box").attr("id") || "";
+                step_name = step_name.replace("-step", "");
+
+                $.ajax({
+                    url: "{% url 'process_step' table.id %}",
+                    type: 'GET',
+                    data: {
+                        'step_name': step_name,
+                        'current_path': '{{ request.path }}'
+                    },
+                    success: function (data) {
+                        setTimeout(function () {
+                            if (data['redirect']) {
+
+                                window.location = data['redirect_url'];
+
+                            } else {
+                                update_process_nav();
+                            }
+                        }, 1000);
+
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+
+            });
+
+
+            // highlight table columns
+            $('#predicate-annotation').on('mouseenter', '.highlightCol tbody tr', function () {
+                updateHandsontableSetting($(this).data('col'), subj_index);
+            });
+            $('#predicate-annotation').on('mouseleave', '.highlightCol tbody tr', function () {
+                resetHandsontableSettings();
+            });
+        });
+
+        function isNe(col_index) {
+            col_index = parseInt(col_index);
+            return neColsIndexes.includes(col_index);
+
+        }
+
+        function isLit(col_index) {
+            col_index = parseInt(col_index);
+            return litColsIndexes.includes(col_index)
+        }
+
+        function isSubj(col_index) {
+            col_index = parseInt(col_index);
+            return subj_index === col_index
+        }
+
+        function build_header(colIndex, colHeader, view_show_more = true) {
+
+            let icon = "";
+            let type = "";
+            let showMore = view_show_more ? '<i title="more info" class="fa fa-info fa-fw show-more" aria-hidden="true"></i>' : '';
+
+
+            if (isSubj(colIndex)) {
+                type = '<span class="legend s" title="Subject"> S </span>';
+            } else if (isNe(colIndex)) {
+                type = '<span class="legend ne" title="Named Entity"> NE </span>';
+            } else if (isLit(colIndex)) {
+                icon += getIcon(lit_cols_regex_types[colIndex][0]); // TODO: There are many types in a column
+                type = '<span class="legend l" title="Literal"> L </span>';
+            } else {
+                type = '<span class="legend na" title="No Annotation"> NA </span>';
+                showMore = "";
+            }
+
+            return `<div class="header" id=${colIndex}> ${icon} ${colHeader} <span class="pull-right">${type} ${showMore} </span></div>`
+        }
+
+        function getIcon(type) {
+            let icon;
+
+            var icons = {
+                'geo_coordinates': 'fas fa-globe-americas',
+                'numeric': 'fas fa-hashtag',
+                'address': 'fas fa-map-marker-alt',
+                'hex_color': 'fas fa-palette',
+                'url': 'fas fa-link',
+                'fqdn': 'fas fa-link',  //TODO: This is not implemented in transformers, check_type eccetera...
+                'credit_card': 'far fa-credit-card',
+                'image': 'fas fa-image',
+                'ip': 'fas fa-laptop',
+                'isbn': 'fas fa-book',
+                'iso8601': 'fas fa-calendar',
+                'date': 'fas fa-calendar',
+                'boolean': 'fas fa-toggle-on',
+                'id': 'fas fa-key',
+                'description': 'fas fa-file-alt',
+                'iata': 'fas fa-plane',
+                'currency': 'fas fa-dollar-sign',
+            };
+
+            icon = icons[type] || 'fas fa-ban';
+            return `<i class="${icon}" aria-hidden="true" title="${type}"></i> `;
+        }
+
+        function colorColumnsByType(instance, td, row, col, prop, value, cellProperties) {
+
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+            if (isSubj(col)) {
+                td.style.color = '#67429a';
+                td.style.background = 'rgba(103, 66, 154, 0.08)';
+            } else if (isNe(col)) {
+                td.style.color = '#20799f';
+                td.style.background = 'rgba(32, 121, 159,.08)';
+            } else if (isLit(col)) {
+                td.style.color = '#577b16';
+                td.style.background = 'rgba(87, 123, 22, .08)';
+            } else {
+                td.style.color = '#63666c';
+                td.style.background = 'rgba(99, 102, 108, .15)';
+            }
+
+        }
+
+        function chartSetup(dataset) {
+            const colorsPaletteMonochrome = ['#00a65a', '#128059', '#255A58', '#2F4858', '#4A496E', '#734C90'];
+
+            // add color for pie chart;
+            // number of colors must at least the same number as element in dataset
+            let colors;
+            if (dataset.length < colorsPaletteMonochrome.length) {
+                colors = colorsPaletteMonochrome;
+            } else {
+                let colors_tmp = [];
+                while (colors_tmp.length <= dataset.length) {
+                    $.each(colorsPaletteMonochrome, function (index, value) {
+                        colors_tmp.push(value);
+                    });
+                }
+            }
+
+            dataset.sort(function (a, b) {
+                return b[1] - a[1];
+            });
+            dataset.unshift(['LiteralType', 'Percentage']);
+
+
+            // Load the Visualization API and the corechart package.
+            google.charts.load('current', {packages: ['corechart']});
+
+            // Set a callback to run when the Google Visualization API is loaded.
+            google.charts.setOnLoadCallback(drawChart);
+
+
+            // Callback that creates and populates a data table,
+            // instantiates the pie chart, passes in the data and
+            // draws it.
+            function drawChart() {
+                const data = google.visualization.arrayToDataTable(dataset);
+
+                // Set chart options
+                const options = {
+                    width: '320',
+                    height: '400',
+                    chartArea: {width: '320', top: '10', left: '10'},
+                    pieSliceText: 'label',
+                    pieSliceTextStyle: {fontSize: '13'},
+                    legend: {alignment: 'center', position: 'right', textStyle: {fontSize: '13'}},
+                    tooltip: {showColorCode: true, text: 'percentage'},
+                    colors,
+                };
+
+
+                // Instantiate and draw our chart, passing in some options.
+                const chartContainer = document.getElementById('chart_div');
+                if (chartContainer) {
+                    const chart = new google.visualization.PieChart(chartContainer);
+                    chart.draw(data, options);
+                }
+            }
+
+        }
+
+        function splitTypeUri(uri) {
+            let result = {};
+
+            if (uri)
+                return {
+                    'uri': uri,
+                    'label':
+                        removeUrlSchema(uri, 'not found')
+                };
+
+            return 'not found';
+        }
+
+
+        Handlebars.registerHelper("offset", function (value, options) {
+            return parseInt(value) + 1;
+        });
+
+        Handlebars.registerHelper('eq', function(v1, v2, options) {
+            if(v1 === v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+
+
+    </script>
+
+{% endblock %}
+

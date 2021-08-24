@@ -1,0 +1,55 @@
+   {% verbatim %}
+    <script id="template_predicateAnn" type="text/x-handlebars-template">
+
+        {{#each rdf }}
+
+        <tr data-col="{{ this.col_idx }}">
+            <td>
+                <div class="td-content">
+                    <span class="col-name">{{ subject.col_header }}</span>
+
+                    {{#if subject.type.uri }}
+                    <a target="_blank" title="{{ subject.type.uri }}"
+                       href="{{ subject.type.uri }}">
+                        {{ subject.type.label }}
+                    </a>
+                    {{ else }}
+                    {{ this.type.subject }}
+                    {{/if }}
+                </div>
+            </td>
+            <td>
+                <div class="td-content">
+                    {{#if this.predicate.uri }}
+                    <a target="_blank" title="{{ this.predicate.uri }}"
+                       href="{{ this.predicate.uri }}">
+                        {{ this.predicate.label }}
+                    </a>
+                    {{ else }}
+                    {{ this.predicate }}
+                    {{/if }}
+                </div>
+            </td>
+            <td>
+                <div class="td-content">
+                    <span class="col-name">{{ object.col_header }}</span>
+                    {{#each this.object.type}}
+                    {{#if this.uri }}
+
+                    <a target="_blank" title="{{ this.uri }}"
+                       href="{{ this.uri }}">
+                        {{ this.label }}
+                    </a>
+
+                    {{ else }}
+                    {{ this.object }}
+                    {{/if }}
+                    {{/each }}
+                </div>
+            </td>
+        </tr>
+
+        {{/each }}
+    </script>
+
+    {% endverbatim %}

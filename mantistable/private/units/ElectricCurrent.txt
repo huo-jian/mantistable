@@ -1,0 +1,4 @@
+"electricurrent"|"ampere"|"A","ampere"
+"electricurrent"|"kiloampere"|"kA","kiloampere"|"1000.0"
+"electricurrent"|"milliampere"|"mA","milliampere"|"0.001"
+"electricurrent"|"microampere"|"µA","microampere"|"1.0E-6"

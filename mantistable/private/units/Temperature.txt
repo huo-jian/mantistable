@@ -1,0 +1,4 @@
+"temperature"|"kelvin"|"K","kelvin","Κ","κέλβιν"
+"temperature"|"degreeCelsius"|"°C","degree celsius","C","Celsius","βαθμοί"|"1"|"273.15"
+"temperature"|"degreeFahrenheit"|"°F","F","Fahrenheit","degree fahrenheit"|"1/1.8"|"459.67/1.8"
+"temperature"|"degreeRankine"|"°R","R","degree rankine"|"5.0/9.0"

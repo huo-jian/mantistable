@@ -1,0 +1,7 @@
+"time"|"second"|"s","sec","secs","second","seconds","δ","δευτερόλεπτα"
+"time"|"millisecond"|"ms","millisecond","milliseconds"|"0.001"
+"time"|"microsecond"|"µs","microsecond","microseconds"|"1.0E-6"
+"time"|"nanosecond"|"ns","nanosecond","nanoseconds"|"1.0E-9"
+"time"|"minute"|"m","min","min.","mins","minute","minutes","λ","λεπτά"|"60.0"
+"time"|"hour"|"h","hr","hr.","hour","hours","std","ω","ώρες","ώρα"|"3600.0"
+"time"|"day"|"d","days","day","μ","μέρα","μέρες"|"86400.0"

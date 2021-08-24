@@ -1,0 +1,81 @@
+{% verbatim %}
+
+<script id="template_columnAnalysis_ne" type="text/x-handlebars-template">
+    <p class="column-type text-big">
+        <span class="key">Column type:</span>
+        <span class="value">{{ column_type }}</span>
+    </p>
+
+    <div class="ne-col">
+        <p class="heading text-big">
+            <span class="value">Subject Column Detection</span>
+        </p>
+
+        <ul class="list-unstyled">
+            <li>
+                <span class="key">Fraction of empty cell:</span>
+                <span class="value">{{ column_score.emc }}</span>
+            </li>
+            <li>
+                <span class="key">Fraction of cell with unique content: </span>
+                <span class="value">{{ column_score.uc }}</span>
+            </li>
+
+            <li>
+                <span class="key">Distance from the first NE-column:</span>
+                <span class="value">{{ column_score.df }}</span>
+            </li>
+            <li>
+                <span class="key">Average number of words:</span>
+                <span class="value">{{ column_score.aw }}</span>
+            </li>
+        </ul>
+
+        <ul class="list-unstyled spacer">
+            <li class="bold">
+                Normalized values
+            </li>
+            <li>
+                <span class="key">Fraction of empty cell:</span>
+                <span class="value">{{ column_score.emcNorm }}</span>
+            </li>
+            <li>
+                <span class="key">Fraction of cell with unique content: </span>
+                <span class="value">{{ column_score.ucNorm }}</span>
+            </li>
+            <li>
+                <span class="key">Distance from the first NE-column:</span>
+                <span class="value">{{ column_score.dfNorm }}</span>
+            </li>
+            <li>
+                <span class="key">Average number of words:</span>
+                <span class="value">{{ column_score.awNorm }}</span>
+            </li>
+        </ul>
+
+        <div class="score">
+            <span class="value bigger block"> {{ column_score.finalScore }} </span>
+            <span class="key block"> Final score</span>
+
+            <i class="{{ result_icon }}"></i>
+
+        </div>
+
+
+    </div>
+
+</script>
+
+<script id="template_columnAnalysis_lit" type="text/x-handlebars-template">
+    <p class="column-type text-big">
+        <span class="key">Column type:</span>
+        <span class="value">{{ column_type }}</span>
+    </p>
+
+    <div class="lit-col">
+        <div id="chart_div"></div>
+
+    </div>
+</script>
+
+{% endverbatim %}
